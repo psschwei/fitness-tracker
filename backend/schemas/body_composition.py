@@ -1,0 +1,35 @@
+"""Pydantic schemas for body composition API."""
+
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, Field
+
+
+class BodyCompositionBase(BaseModel):
+    """Base body composition schema."""
+    weight_pounds: float = Field(..., gt=0, description="Weight in pounds")
+    waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
+    notes: Optional[str] = Field(None, description="Additional notes")
+
+
+class BodyCompositionCreate(BodyCompositionBase):
+    """Schema for creating a new body composition entry."""
+    date: Optional[datetime] = Field(None, description="Measurement date (defaults to now)")
+
+
+class BodyCompositionUpdate(BaseModel):
+    """Schema for updating a body composition entry."""
+    weight_pounds: Optional[float] = Field(None, gt=0, description="Weight in pounds")
+    waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
+    notes: Optional[str] = Field(None, description="Additional notes")
+
+
+class BodyCompositionResponse(BodyCompositionBase):
+    """Schema for body composition response."""
+    id: int
+    date: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True 
