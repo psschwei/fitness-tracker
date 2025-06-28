@@ -9,6 +9,7 @@ interface ExerciseEntry {
   weight: number
   reps_per_set: number
   display_weight: number
+  notes: string
 }
 
 interface BatchExerciseFormProps {
@@ -20,8 +21,9 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   const { units } = useUnits()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>([
-    { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }
+    { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0, notes: '' }
   ])
+  const [workoutNotes, setWorkoutNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -49,21 +51,21 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   }
 
   const addExerciseEntry = () => {
-    setExerciseEntries(prev => [...prev, { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }])
+    setExerciseEntries(prev => [...prev, { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0, notes: '' }])
   }
 
   const removeExerciseEntry = (index: number) => {
     setExerciseEntries(prev => prev.filter((_, i) => i !== index))
   }
 
-  const updateExerciseEntry = (index: number, field: keyof ExerciseEntry, value: number) => {
+  const updateExerciseEntry = (index: number, field: keyof ExerciseEntry, value: number | string) => {
     setExerciseEntries(prev => 
       prev.map((entry, i) => {
         if (i === index) {
           const updated = { ...entry, [field]: value }
           // If updating display_weight, also update the backend weight
           if (field === 'display_weight') {
-            updated.weight = convertWeight(value, units.exerciseWeight, 'lbs')
+            updated.weight = convertWeight(value as number, units.exerciseWeight, 'lbs')
           }
           return updated
         }
@@ -90,17 +92,20 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       
       const workoutData: WorkoutCreate = {
         date,
+        notes: workoutNotes || undefined,
         exercises: validEntries.map(entry => ({
           exercise_id: entry.exercise_id,
           weight: entry.weight,
-          reps_per_set: entry.reps_per_set
+          reps_per_set: entry.reps_per_set,
+          notes: entry.notes
         })),
       }
       
       await workoutApi.create(workoutData)
       
       // Reset form
-      setExerciseEntries([{ exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }])
+      setExerciseEntries([{ exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0, notes: '' }])
+      setWorkoutNotes('')
       
       onSuccess()
     } catch (err) {
@@ -186,6 +191,19 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
                 />
               </div>
             </div>
+
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes (Optional)
+              </label>
+              <textarea
+                value={entry.notes || ''}
+                onChange={(e) => updateExerciseEntry(index, 'notes', e.target.value)}
+                className="input w-full"
+                placeholder="Add any notes about this exercise..."
+                rows={2}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -197,6 +215,20 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       >
         + Add Another Exercise
       </button>
+
+      <div>
+        <label htmlFor="workout-notes" className="block text-sm font-medium text-gray-700 mb-1">
+          Workout Notes (Optional)
+        </label>
+        <textarea
+          id="workout-notes"
+          value={workoutNotes}
+          onChange={(e) => setWorkoutNotes(e.target.value)}
+          className="input w-full"
+          placeholder="Add any notes about this workout session..."
+          rows={3}
+        />
+      </div>
 
       <button
         type="submit"

@@ -123,7 +123,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
       {/* Exercises Section */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Exercises</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Workouts</h2>
           <div className="flex space-x-2">
             <button className="btn btn-primary text-sm">
               Add Exercise
@@ -148,16 +148,28 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                     Delete Workout
                   </button>
                 </div>
+                {workout.notes && (
+                  <div className="mb-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                    <p className="text-sm text-blue-800 italic">
+                      "{workout.notes}"
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-3">
                   {workout.exercises.map((exercise) => (
                     <div key={exercise.id} className="flex items-center justify-between bg-white rounded p-3">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{exercise.exercise_name}</h3>
                         <p className="text-sm text-gray-500">
                           {formatWeight(convertWeight(exercise.weight, 'lbs', units.exerciseWeight), units.exerciseWeight)} × {exercise.reps_per_set} reps
                         </p>
+                        {exercise.notes && (
+                          <p className="text-sm text-gray-600 mt-1 italic">
+                            "{exercise.notes}"
+                          </p>
+                        )}
                       </div>
-                      <button className="text-red-500 hover:text-red-700 text-sm">
+                      <button className="text-red-500 hover:text-red-700 text-sm ml-4">
                         Remove
                       </button>
                     </div>

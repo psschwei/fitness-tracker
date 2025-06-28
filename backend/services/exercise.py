@@ -87,10 +87,21 @@ class ExerciseService:
         
         # Add exercises to the workout
         for exercise_data in workout_data.exercises:
+            # Handle both old format (sets_data) and new format (weight, reps_per_set)
+            if hasattr(exercise_data, 'sets_data') and exercise_data.sets_data:
+                # Old format with sets_data
+                sets_data = [set_data.dict() for set_data in exercise_data.sets_data]
+            else:
+                # New format with weight and reps_per_set
+                sets_data = [{
+                    'weight': exercise_data.weight,
+                    'reps': exercise_data.reps_per_set
+                }]
+            
             workout_exercise = WorkoutExercise(
                 workout_id=db_workout.id,
                 exercise_id=exercise_data.exercise_id,
-                sets_data=[set_data.dict() for set_data in exercise_data.sets_data],
+                sets_data=sets_data,
                 notes=exercise_data.notes
             )
             self.db.add(workout_exercise)

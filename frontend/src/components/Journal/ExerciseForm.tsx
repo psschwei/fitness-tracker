@@ -19,7 +19,9 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
     exercise_id: 0,
     weight: 0,
     reps_per_set: 0,
+    notes: '',
   })
+  const [workoutNotes, setWorkoutNotes] = useState('')
   const [displayWeight, setDisplayWeight] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -92,6 +94,7 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
       
       const workoutData: WorkoutCreate = {
         date,
+        notes: workoutNotes || undefined,
         exercises: [{
           ...formData,
           exercise_id: exerciseId
@@ -104,10 +107,12 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
       setExerciseInput('')
       setSelectedExerciseId(null)
       setDisplayWeight(0)
+      setWorkoutNotes('')
       setFormData({
         exercise_id: 0,
         weight: 0,
         reps_per_set: 0,
+        notes: '',
       })
       
       // Reload exercises to include the new one
@@ -122,9 +127,9 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
     }
   }
 
-  const handleInputChange = (field: keyof WorkoutExerciseCreate, value: number) => {
+  const handleInputChange = (field: keyof WorkoutExerciseCreate, value: number | string) => {
     if (field === 'weight') {
-      setDisplayWeight(value)
+      setDisplayWeight(value as number)
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
     }
@@ -225,6 +230,34 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
             required
           />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+          Exercise Notes (Optional)
+        </label>
+        <textarea
+          id="notes"
+          value={formData.notes || ''}
+          onChange={(e) => handleInputChange('notes', e.target.value)}
+          className="input w-full"
+          placeholder="Add any notes about this exercise..."
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="workout-notes" className="block text-sm font-medium text-gray-700 mb-1">
+          Workout Notes (Optional)
+        </label>
+        <textarea
+          id="workout-notes"
+          value={workoutNotes}
+          onChange={(e) => setWorkoutNotes(e.target.value)}
+          className="input w-full"
+          placeholder="Add any notes about this workout session..."
+          rows={3}
+        />
       </div>
 
       <button

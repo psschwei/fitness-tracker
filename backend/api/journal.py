@@ -20,6 +20,7 @@ class WorkoutExercise(BaseModel):
     exercise_name: str
     weight: float
     reps_per_set: int
+    notes: Optional[str] = None
     created_at: str
     updated_at: str
 
@@ -28,6 +29,7 @@ class Workout(BaseModel):
     """Schema for a workout."""
     id: int
     date: str
+    notes: Optional[str] = None
     created_at: str
     updated_at: str
     exercises: List[WorkoutExercise]
@@ -64,13 +66,23 @@ async def get_daily_entry(
     for workout in workouts:
         exercises = []
         for exercise in workout.exercises:
+            # Extract weight and reps from sets_data
+            weight = 0
+            reps_per_set = 0
+            if exercise.sets_data and len(exercise.sets_data) > 0:
+                # Use the first set's data
+                first_set = exercise.sets_data[0]
+                weight = first_set.get('weight', 0)
+                reps_per_set = first_set.get('reps', 0)
+            
             exercises.append(WorkoutExercise(
                 id=exercise.id,
                 workout_id=workout.id,
                 exercise_id=exercise.exercise_id,
                 exercise_name=exercise.exercise.name,
-                weight=exercise.weight,
-                reps_per_set=exercise.reps_per_set,
+                weight=weight,
+                reps_per_set=reps_per_set,
+                notes=exercise.notes,
                 created_at=exercise.created_at.isoformat(),
                 updated_at=exercise.updated_at.isoformat()
             ))
@@ -78,6 +90,7 @@ async def get_daily_entry(
         formatted_workouts.append(Workout(
             id=workout.id,
             date=workout.date.isoformat(),
+            notes=workout.notes,
             created_at=workout.created_at.isoformat(),
             updated_at=workout.updated_at.isoformat(),
             exercises=exercises
@@ -137,13 +150,23 @@ async def get_daily_entries(
         for workout in workouts:
             exercises = []
             for exercise in workout.exercises:
+                # Extract weight and reps from sets_data
+                weight = 0
+                reps_per_set = 0
+                if exercise.sets_data and len(exercise.sets_data) > 0:
+                    # Use the first set's data
+                    first_set = exercise.sets_data[0]
+                    weight = first_set.get('weight', 0)
+                    reps_per_set = first_set.get('reps', 0)
+                
                 exercises.append(WorkoutExercise(
                     id=exercise.id,
                     workout_id=workout.id,
                     exercise_id=exercise.exercise_id,
                     exercise_name=exercise.exercise.name,
-                    weight=exercise.weight,
-                    reps_per_set=exercise.reps_per_set,
+                    weight=weight,
+                    reps_per_set=reps_per_set,
+                    notes=exercise.notes,
                     created_at=exercise.created_at.isoformat(),
                     updated_at=exercise.updated_at.isoformat()
                 ))
@@ -151,6 +174,7 @@ async def get_daily_entries(
             formatted_workouts.append(Workout(
                 id=workout.id,
                 date=workout.date.isoformat(),
+                notes=workout.notes,
                 created_at=workout.created_at.isoformat(),
                 updated_at=workout.updated_at.isoformat(),
                 exercises=exercises

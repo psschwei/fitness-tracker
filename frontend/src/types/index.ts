@@ -53,6 +53,7 @@ export interface ExerciseCreate {
 export interface Workout {
   id: number
   date: string
+  notes?: string | null
   created_at: string
   updated_at: string
   exercises: WorkoutExercise[]
@@ -60,6 +61,7 @@ export interface Workout {
 
 export interface WorkoutCreate {
   date: string
+  notes?: string | null
   exercises: WorkoutExerciseCreate[]
 }
 
@@ -70,6 +72,7 @@ export interface WorkoutExercise {
   exercise_name: string
   weight: number
   reps_per_set: number
+  notes?: string | null
   created_at: string
   updated_at: string
 }
@@ -78,6 +81,7 @@ export interface WorkoutExerciseCreate {
   exercise_id: number
   weight: number
   reps_per_set: number
+  notes?: string | null
 }
 
 // Journal Types
