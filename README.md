@@ -31,7 +31,6 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 - **Backend**: Python FastAPI with SQLAlchemy ORM
 - **Database**: SQLite (local file-based)
 - **Frontend**: React with TypeScript and Tailwind CSS
-- **Desktop**: Tauri (Rust-based desktop wrapper)
 - **Data Processing**: Python pandas, numpy for analytics
 - **Charts**: Python plotly for server-side chart generation
 
@@ -39,7 +38,6 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 1. **Python Backend**: Handles all business logic, data processing, and analytics
 2. **SQLite Database**: Local file storage with automatic backup
 3. **React Frontend**: Modern UI for data entry and display
-4. **Tauri Desktop**: Lightweight desktop wrapper for system integration
 
 ## Installation
 
@@ -47,7 +45,6 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 - Python 3.11 or higher
 - uv (Python package manager)
 - Node.js 18 or higher (for frontend)
-- Rust (for Tauri)
 
 ### Backend Setup
 
@@ -92,6 +89,23 @@ The frontend will be available at `http://localhost:3000`
 
 To run the complete application, you need both the backend and frontend running simultaneously:
 
+#### Option 1: Quick Start (Recommended)
+Use the launcher script to start everything with one command:
+
+```bash
+./start_app.sh
+```
+
+This script will:
+- Install dependencies if needed
+- Start the backend server
+- Start the frontend development server
+- Open your browser to the application
+- Provide a clean shutdown with Ctrl+C
+
+#### Option 2: Manual Start
+If you prefer to start services manually:
+
 1. **Terminal 1 - Backend**:
    ```bash
    # From the project root
@@ -108,19 +122,6 @@ To run the complete application, you need both the backend and frontend running 
 3. **Access the application**:
    - Frontend: http://localhost:3000
    - Backend API docs: http://localhost:8000/docs
-
-### Tauri Desktop App (Coming Soon)
-
-1. **Install Tauri CLI**:
-   ```bash
-   cargo install tauri-cli
-   ```
-
-2. **Build the desktop app**:
-   ```bash
-   cd src-tauri
-   cargo tauri build
-   ```
 
 ## API Documentation
 
@@ -189,7 +190,6 @@ fitness-tracker/
 │   │   └── types/          # TypeScript types
 │   ├── package.json        # Frontend dependencies
 │   └── README.md           # Frontend documentation
-├── src-tauri/              # Tauri desktop wrapper (coming soon)
 ├── pyproject.toml          # Python project configuration
 └── README.md              # This file
 ```
@@ -250,15 +250,37 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [x] Body composition forms
 - [x] Exercise entry (single and batch)
 
-### Phase 3: Desktop Integration
-- [ ] Tauri desktop wrapper
-- [ ] System tray integration
-- [ ] Automatic startup
-- [ ] Data backup/restore
-
-### Phase 4: Advanced Features
+### Phase 3: Enhanced Features
 - [ ] Goal setting and tracking
 - [ ] Workout scheduling
 - [ ] Data export/import
 - [ ] Advanced analytics
 - [ ] Mobile responsive design
+- [ ] Offline support improvements
+- [ ] Data backup/restore
+
+## Why Web-Only?
+
+After exploring desktop options, we've decided to focus on the web application because:
+
+### **Simplicity**
+- Single codebase to maintain
+- No complex build processes
+- Familiar web technologies
+
+### **Cross-Platform**
+- Works on any device with a browser
+- No installation required
+- Easy updates
+
+### **Development Speed**
+- Fast iteration with hot reload
+- Rich ecosystem of web tools
+- Easy debugging
+
+### **Accessibility**
+- Works on desktop, tablet, and mobile
+- No system-specific dependencies
+- Universal access
+
+The web application provides all the functionality you need for fitness tracking while keeping the codebase simple and maintainable.
