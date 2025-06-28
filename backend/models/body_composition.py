@@ -15,7 +15,9 @@ class BodyComposition(Base):
     id = Column(Integer, primary_key=True, index=True)
     date = Column(DateTime, nullable=False, default=func.now())
     weight_pounds = Column(Float, nullable=False)  # Weight in pounds
+    height_inches = Column(Float)  # Height in inches
     waist_inches = Column(Float)  # Waist circumference in inches
+    neck_inches = Column(Float)  # Neck circumference in inches
     notes = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

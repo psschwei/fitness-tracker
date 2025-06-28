@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 class BodyCompositionBase(BaseModel):
     """Base body composition schema."""
     weight_pounds: float = Field(..., gt=0, description="Weight in pounds")
+    height_inches: Optional[float] = Field(None, gt=0, description="Height in inches")
     waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
+    neck_inches: Optional[float] = Field(None, gt=0, description="Neck circumference in inches")
     notes: Optional[str] = Field(None, description="Additional notes")
 
 
@@ -20,7 +22,9 @@ class BodyCompositionCreate(BodyCompositionBase):
 class BodyCompositionUpdate(BaseModel):
     """Schema for updating a body composition entry."""
     weight_pounds: Optional[float] = Field(None, gt=0, description="Weight in pounds")
+    height_inches: Optional[float] = Field(None, gt=0, description="Height in inches")
     waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
+    neck_inches: Optional[float] = Field(None, gt=0, description="Neck circumference in inches")
     notes: Optional[str] = Field(None, description="Additional notes")
 
 

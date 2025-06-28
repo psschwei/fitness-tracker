@@ -16,7 +16,11 @@ const INCHES_TO_CM = 2.54
 const CM_TO_INCHES = 0.393701
 
 // Weight conversions
-export const convertWeight = (value: number, from: WeightUnit, to: WeightUnit): number => {
+export const convertWeight = (value: number | null | undefined, from: WeightUnit, to: WeightUnit): number => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 0
+  }
+  
   if (from === to) return value
   
   if (from === 'lbs' && to === 'kg') {
@@ -29,7 +33,11 @@ export const convertWeight = (value: number, from: WeightUnit, to: WeightUnit): 
 }
 
 // Length conversions
-export const convertLength = (value: number, from: LengthUnit, to: LengthUnit): number => {
+export const convertLength = (value: number | null | undefined, from: LengthUnit, to: LengthUnit): number => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 0
+  }
+  
   if (from === to) return value
   
   if (from === 'inches' && to === 'cm') {
@@ -42,12 +50,18 @@ export const convertLength = (value: number, from: LengthUnit, to: LengthUnit): 
 }
 
 // Format weight with unit
-export const formatWeight = (value: number, unit: WeightUnit): string => {
+export const formatWeight = (value: number | null | undefined, unit: WeightUnit): string => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 'Not recorded'
+  }
   return `${value.toFixed(1)} ${unit}`
 }
 
 // Format length with unit
-export const formatLength = (value: number, unit: LengthUnit): string => {
+export const formatLength = (value: number | null | undefined, unit: LengthUnit): string => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return 'Not recorded'
+  }
   return `${value.toFixed(1)} ${unit}`
 }
 

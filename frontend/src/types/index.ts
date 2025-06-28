@@ -3,7 +3,9 @@ export interface BodyComposition {
   id: number
   date: string
   weight_pounds: number
+  height_inches: number | null
   waist_inches: number | null
+  neck_inches: number | null
   created_at: string
   updated_at: string
   notes?: string | null
@@ -12,13 +14,17 @@ export interface BodyComposition {
 export interface BodyCompositionCreate {
   date: string
   weight_pounds: number
+  height_inches: number | null
   waist_inches: number | null
+  neck_inches: number | null
   notes?: string | null
 }
 
 export interface BodyCompositionUpdate {
   weight_pounds?: number
-  waist_inches?: number
+  height_inches?: number | null
+  waist_inches?: number | null
+  neck_inches?: number | null
   notes?: string | null
 }
 

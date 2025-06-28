@@ -88,8 +88,11 @@ async def get_daily_entry(
         body_composition={
             "id": body_comp.id,
             "date": body_comp.date.isoformat(),
-            "weight": body_comp.weight_pounds,
-            "waist_circumference": body_comp.waist_inches,
+            "weight_pounds": body_comp.weight_pounds,
+            "height_inches": body_comp.height_inches,
+            "waist_inches": body_comp.waist_inches,
+            "neck_inches": body_comp.neck_inches,
+            "notes": body_comp.notes,
             "created_at": body_comp.created_at.isoformat(),
             "updated_at": body_comp.updated_at.isoformat()
         } if body_comp else None,
@@ -155,8 +158,11 @@ async def get_daily_entries(
             body_composition={
                 "id": body_comp.id,
                 "date": body_comp.date.isoformat(),
-                "weight": body_comp.weight_pounds,
-                "waist_circumference": body_comp.waist_inches,
+                "weight_pounds": body_comp.weight_pounds,
+                "height_inches": body_comp.height_inches,
+                "waist_inches": body_comp.waist_inches,
+                "neck_inches": body_comp.neck_inches,
+                "notes": body_comp.notes,
                 "created_at": body_comp.created_at.isoformat(),
                 "updated_at": body_comp.updated_at.isoformat()
             } if body_comp else None,

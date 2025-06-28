@@ -58,10 +58,28 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                   </p>
                 </div>
                 <div>
+                  <span className="text-sm font-medium text-gray-500">Height</span>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {entry.body_composition.height_inches ? 
+                      formatLength(convertLength(entry.body_composition.height_inches, 'inches', units.length), units.length) :
+                      'Not recorded'
+                    }
+                  </p>
+                </div>
+                <div>
                   <span className="text-sm font-medium text-gray-500">Waist Circumference</span>
                   <p className="text-lg font-semibold text-gray-900">
                     {entry.body_composition.waist_inches ? 
                       formatLength(convertLength(entry.body_composition.waist_inches, 'inches', units.length), units.length) :
+                      'Not recorded'
+                    }
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Neck Circumference</span>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {entry.body_composition.neck_inches ? 
+                      formatLength(convertLength(entry.body_composition.neck_inches, 'inches', units.length), units.length) :
                       'Not recorded'
                     }
                   </p>

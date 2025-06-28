@@ -14,11 +14,15 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   const [formData, setFormData] = useState<BodyCompositionCreate>({
     date,
     weight_pounds: 0,
-    waist_inches: 0,
+    height_inches: null,
+    waist_inches: null,
+    neck_inches: null,
     notes: '',
   })
   const [displayWeight, setDisplayWeight] = useState(0)
+  const [displayHeight, setDisplayHeight] = useState(0)
   const [displayWaist, setDisplayWaist] = useState(0)
+  const [displayNeck, setDisplayNeck] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,15 +37,21 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       
       // Convert backend units to display units
       const displayWeightValue = convertWeight(latestData.weight_pounds, 'lbs', units.bodyWeight)
+      const displayHeightValue = latestData.height_inches ? convertLength(latestData.height_inches, 'inches', units.length) : 0
       const displayWaistValue = latestData.waist_inches ? convertLength(latestData.waist_inches, 'inches', units.length) : 0
+      const displayNeckValue = latestData.neck_inches ? convertLength(latestData.neck_inches, 'inches', units.length) : 0
       
       setDisplayWeight(displayWeightValue)
+      setDisplayHeight(displayHeightValue)
       setDisplayWaist(displayWaistValue)
+      setDisplayNeck(displayNeckValue)
       
       setFormData(prev => ({
         ...prev,
         weight_pounds: latestData.weight_pounds,
-        waist_inches: latestData.waist_inches || 0,
+        height_inches: latestData.height_inches,
+        waist_inches: latestData.waist_inches,
+        neck_inches: latestData.neck_inches,
         notes: latestData.notes || ''
       }))
     } catch (err) {
@@ -55,15 +65,17 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
     setFormData(prev => ({
       ...prev,
       weight_pounds: convertWeight(displayWeight, units.bodyWeight, 'lbs'),
-      waist_inches: displayWaist > 0 ? convertLength(displayWaist, units.length, 'inches') : 0
+      height_inches: displayHeight > 0 ? convertLength(displayHeight, units.length, 'inches') : null,
+      waist_inches: displayWaist > 0 ? convertLength(displayWaist, units.length, 'inches') : null,
+      neck_inches: displayNeck > 0 ? convertLength(displayNeck, units.length, 'inches') : null
     }))
-  }, [units.bodyWeight, units.length, displayWeight, displayWaist])
+  }, [units.bodyWeight, units.length, displayWeight, displayHeight, displayWaist, displayNeck])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (formData.weight_pounds <= 0 || (formData.waist_inches !== null && formData.waist_inches <= 0)) {
-      setError('Please enter valid measurements')
+    if (displayWeight <= 0) {
+      setError('Please enter a valid weight')
       return
     }
 
@@ -74,11 +86,15 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       
       // Reset form
       setDisplayWeight(0)
+      setDisplayHeight(0)
       setDisplayWaist(0)
+      setDisplayNeck(0)
       setFormData({
         date,
         weight_pounds: 0,
-        waist_inches: 0,
+        height_inches: null,
+        waist_inches: null,
+        neck_inches: null,
         notes: '',
       })
       
@@ -94,8 +110,12 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   const handleInputChange = (field: keyof BodyCompositionCreate, value: number | string) => {
     if (field === 'weight_pounds') {
       setDisplayWeight(value as number)
+    } else if (field === 'height_inches') {
+      setDisplayHeight(value as number)
     } else if (field === 'waist_inches') {
       setDisplayWaist(value as number)
+    } else if (field === 'neck_inches') {
+      setDisplayNeck(value as number)
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
     }
@@ -108,6 +128,42 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
           <p className="text-red-600 text-sm">{error}</p>
         </div>
       )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="height_inches" className="block text-sm font-medium text-gray-700 mb-1">
+            Height ({getLengthUnitSymbol(units.length)})
+          </label>
+          <input
+            type="number"
+            id="height_inches"
+            step="0.1"
+            min="0"
+            value={displayHeight || ''}
+            onChange={(e) => handleInputChange('height_inches', parseFloat(e.target.value) || 0)}
+            className="input"
+            placeholder="0.0"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="neck_inches" className="block text-sm font-medium text-gray-700 mb-1">
+            Neck Circumference ({getLengthUnitSymbol(units.length)})
+          </label>
+          <input
+            type="number"
+            id="neck_inches"
+            step="0.1"
+            min="0"
+            value={displayNeck || ''}
+            onChange={(e) => handleInputChange('neck_inches', parseFloat(e.target.value) || 0)}
+            className="input"
+            placeholder="0.0"
+            required
+          />
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>

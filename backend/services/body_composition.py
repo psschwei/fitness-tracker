@@ -21,7 +21,9 @@ class BodyCompositionService:
         db_measurement = BodyComposition(
             date=measurement_data.date or datetime.now(),
             weight_pounds=measurement_data.weight_pounds,
+            height_inches=measurement_data.height_inches,
             waist_inches=measurement_data.waist_inches,
+            neck_inches=measurement_data.neck_inches,
             notes=measurement_data.notes
         )
         
