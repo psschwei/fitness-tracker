@@ -1,7 +1,6 @@
 import { DailyEntry } from '../../types'
 import { bodyCompositionApi, workoutApi } from '../../api/client'
 import BodyCompositionForm from './BodyCompositionForm'
-import ExerciseForm from './ExerciseForm'
 import BatchExerciseForm from './BatchExerciseForm'
 import { useUnits } from '../../contexts/UnitContext'
 import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI, formatBodyFat } from '../../utils/units'
@@ -124,14 +123,6 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Workouts</h2>
-          <div className="flex space-x-2">
-            <button className="btn btn-primary text-sm">
-              Add Exercise
-            </button>
-            <button className="btn btn-secondary text-sm">
-              Batch Add
-            </button>
-          </div>
         </div>
 
         {workouts.length > 0 ? (
@@ -178,15 +169,9 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500 mb-4">No exercises recorded for this day</p>
-            <div className="flex justify-center space-x-2">
-              <ExerciseForm date={entry.date} onSuccess={onUpdate} />
-              <BatchExerciseForm date={entry.date} onSuccess={onUpdate} />
-            </div>
-          </div>
-        )}
+        ) : null}
+
+        <BatchExerciseForm date={entry.date} onSuccess={onUpdate} />
       </div>
     </div>
   )
