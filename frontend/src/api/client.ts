@@ -11,6 +11,9 @@ import {
   BodyCompositionTrend,
   ExerciseProgress,
   DashboardSummary,
+  DailyActivity,
+  DailyActivityCreate,
+  DailyActivityUpdate,
 } from '../types'
 
 const API_BASE = '/api'
@@ -150,4 +153,66 @@ export const analyticsApi = {
 
   getDashboardSummary: (): Promise<DashboardSummary> =>
     apiRequest('/analytics/summary/dashboard'),
-} 
+}
+
+// Daily Activity API
+export const getDailyActivities = async (): Promise<DailyActivity[]> => {
+  const response = await fetch(`${API_BASE}/exercise/daily-activities`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch daily activities');
+  }
+  return response.json();
+};
+
+export const getDailyActivityByDate = async (date: string): Promise<DailyActivity | null> => {
+  try {
+    const response = await fetch(`${API_BASE}/exercise/daily-activities/date/${date}`);
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error('Failed to fetch daily activity');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching daily activity:', error);
+    return null;
+  }
+};
+
+export const createOrUpdateDailyActivity = async (activity: DailyActivityCreate): Promise<DailyActivity> => {
+  const response = await fetch(`${API_BASE}/exercise/daily-activities`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(activity),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create/update daily activity');
+  }
+  return response.json();
+};
+
+export const updateDailyActivity = async (id: number, activity: DailyActivityUpdate): Promise<DailyActivity> => {
+  const response = await fetch(`${API_BASE}/exercise/daily-activities/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(activity),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update daily activity');
+  }
+  return response.json();
+};
+
+export const deleteDailyActivity = async (id: number): Promise<void> => {
+  const response = await fetch(`${API_BASE}/exercise/daily-activities/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete daily activity');
+  }
+}; 

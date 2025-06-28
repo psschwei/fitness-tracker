@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { format, subDays, addDays } from 'date-fns'
-import { DailyEntry } from '../types'
+import { DailyEntry, DailyActivity } from '../types'
 import { journalApi, bodyCompositionApi, workoutApi } from '../api/client'
 import DateNavigation from '../components/Journal/DateNavigation'
 import DailyEntryView from '../components/Journal/DailyEntryView'
+import { DailyActivityForm } from '../components/Journal/DailyActivityForm'
 
 function Journal() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [dailyEntry, setDailyEntry] = useState<DailyEntry | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dailyActivity, setDailyActivity] = useState<DailyActivity | null>(null)
 
   const dateString = format(currentDate, 'yyyy-MM-dd')
 
@@ -84,6 +86,10 @@ function Journal() {
     }
   }
 
+  const handleActivityUpdated = (activity: DailyActivity) => {
+    setDailyActivity(activity)
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -122,12 +128,19 @@ function Journal() {
         onDateSelect={goToDate}
       />
 
-      {dailyEntry && (
-        <DailyEntryView
-          entry={dailyEntry}
-          onUpdate={handleEntryUpdate}
+      <div className="space-y-6">
+        {dailyEntry && (
+          <DailyEntryView
+            entry={dailyEntry}
+            onUpdate={handleEntryUpdate}
+          />
+        )}
+        
+        <DailyActivityForm 
+          date={dateString} 
+          onActivityUpdated={handleActivityUpdated}
         />
-      )}
+      </div>
     </div>
   )
 }

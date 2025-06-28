@@ -3,12 +3,14 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from datetime import date
 
 from backend.database import get_db
-from backend.services.exercise import ExerciseService
+from backend.services.exercise import ExerciseService, DailyActivityService
 from backend.schemas.exercise import (
     ExerciseCreate, ExerciseUpdate, ExerciseResponse,
-    WorkoutCreate, WorkoutUpdate, WorkoutResponse
+    WorkoutCreate, WorkoutUpdate, WorkoutResponse,
+    DailyActivityCreate, DailyActivityUpdate, DailyActivityResponse
 )
 
 router = APIRouter()
@@ -77,6 +79,55 @@ async def delete_exercise(
     if not success:
         raise HTTPException(status_code=404, detail="Exercise not found")
     return {"message": "Exercise deleted successfully"}
+
+
+# Daily Activity endpoints
+@router.get("/daily-activities", response_model=List[DailyActivityResponse])
+def get_daily_activities(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Get all daily activities."""
+    return DailyActivityService.get_daily_activities(db, skip=skip, limit=limit)
+
+
+@router.get("/daily-activities/{activity_id}", response_model=DailyActivityResponse)
+def get_daily_activity(activity_id: int, db: Session = Depends(get_db)):
+    """Get a specific daily activity."""
+    activity = DailyActivityService.get_daily_activity(db, activity_id)
+    if activity is None:
+        raise HTTPException(status_code=404, detail="Daily activity not found")
+    return activity
+
+
+@router.get("/daily-activities/date/{target_date}", response_model=DailyActivityResponse)
+def get_daily_activity_by_date(target_date: date, db: Session = Depends(get_db)):
+    """Get daily activity for a specific date."""
+    activity = DailyActivityService.get_daily_activity_by_date(db, target_date)
+    if activity is None:
+        raise HTTPException(status_code=404, detail="Daily activity not found for this date")
+    return activity
+
+
+@router.post("/daily-activities", response_model=DailyActivityResponse)
+def create_or_update_daily_activity(activity: DailyActivityCreate, db: Session = Depends(get_db)):
+    """Create or update daily activity for a specific date."""
+    return DailyActivityService.create_or_update_daily_activity(db, activity)
+
+
+@router.put("/daily-activities/{activity_id}", response_model=DailyActivityResponse)
+def update_daily_activity(activity_id: int, activity: DailyActivityUpdate, db: Session = Depends(get_db)):
+    """Update a daily activity."""
+    updated_activity = DailyActivityService.update_daily_activity(db, activity_id, activity)
+    if updated_activity is None:
+        raise HTTPException(status_code=404, detail="Daily activity not found")
+    return updated_activity
+
+
+@router.delete("/daily-activities/{activity_id}")
+def delete_daily_activity(activity_id: int, db: Session = Depends(get_db)):
+    """Delete a daily activity."""
+    success = DailyActivityService.delete_daily_activity(db, activity_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Daily activity not found")
+    return {"message": "Daily activity deleted successfully"}
 
 
 # Workout endpoints
@@ -185,6 +236,5 @@ async def calculate_one_rep_max(
     return {
         "weight": weight,
         "reps": reps,
-        "one_rep_max": one_rm,
-        "formula": "Epley (weight * (1 + reps/30))"
+        "one_rep_max": one_rm
     } 

@@ -3,12 +3,13 @@
 from datetime import datetime, timedelta, date
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, and_
 import pandas as pd
 
-from backend.models.exercise import Exercise, Workout, WorkoutExercise
+from backend.models.exercise import Exercise, Workout, WorkoutExercise, DailyActivity
 from backend.schemas.exercise import (
-    ExerciseCreate, ExerciseUpdate, WorkoutCreate, WorkoutUpdate
+    ExerciseCreate, ExerciseUpdate, WorkoutCreate, WorkoutUpdate,
+    DailyActivityCreate, DailyActivityUpdate
 )
 
 
@@ -246,4 +247,147 @@ class ExerciseService:
                 'start': start_date.isoformat(),
                 'end': datetime.now().isoformat()
             }
-        } 
+        }
+
+
+class DailyActivityService:
+    """Service for daily activity operations."""
+    
+    @staticmethod
+    def get_daily_activities(db: Session, skip: int = 0, limit: int = 100) -> List[DailyActivity]:
+        """Get all daily activities."""
+        return db.query(DailyActivity).order_by(DailyActivity.date.desc()).offset(skip).limit(limit).all()
+    
+    @staticmethod
+    def get_daily_activity(db: Session, activity_id: int) -> Optional[DailyActivity]:
+        """Get a specific daily activity by ID."""
+        return db.query(DailyActivity).filter(DailyActivity.id == activity_id).first()
+    
+    @staticmethod
+    def get_daily_activity_by_date(db: Session, target_date: date) -> Optional[DailyActivity]:
+        """Get daily activity for a specific date."""
+        return db.query(DailyActivity).filter(
+            DailyActivity.date >= target_date,
+            DailyActivity.date < target_date.replace(day=target_date.day + 1)
+        ).first()
+    
+    @staticmethod
+    def create_or_update_daily_activity(db: Session, activity: DailyActivityCreate) -> DailyActivity:
+        """Create or update daily activity for a specific date."""
+        activity_data = activity.model_dump()
+        if not activity_data.get('date'):
+            activity_data['date'] = datetime.now()
+        
+        # Convert to date for comparison
+        target_date = activity_data['date'].date()
+        
+        # Check if activity already exists for this date
+        existing_activity = DailyActivityService.get_daily_activity_by_date(db, target_date)
+        
+        if existing_activity:
+            # Update existing activity
+            update_data = {k: v for k, v in activity_data.items() if k != 'date' and v is not None}
+            for field, value in update_data.items():
+                setattr(existing_activity, field, value)
+            db.commit()
+            db.refresh(existing_activity)
+            return existing_activity
+        else:
+            # Create new activity
+            db_activity = DailyActivity(**activity_data)
+            db.add(db_activity)
+            db.commit()
+            db.refresh(db_activity)
+            return db_activity
+    
+    @staticmethod
+    def update_daily_activity(db: Session, activity_id: int, activity: DailyActivityUpdate) -> Optional[DailyActivity]:
+        """Update a daily activity."""
+        db_activity = db.query(DailyActivity).filter(DailyActivity.id == activity_id).first()
+        if db_activity:
+            update_data = activity.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                setattr(db_activity, field, value)
+            db.commit()
+            db.refresh(db_activity)
+        return db_activity
+    
+    @staticmethod
+    def delete_daily_activity(db: Session, activity_id: int) -> bool:
+        """Delete a daily activity."""
+        db_activity = db.query(DailyActivity).filter(DailyActivity.id == activity_id).first()
+        if db_activity:
+            db.delete(db_activity)
+            db.commit()
+            return True
+        return False
+
+
+class WorkoutService:
+    """Service for workout operations."""
+    
+    @staticmethod
+    def get_workouts(db: Session, skip: int = 0, limit: int = 100) -> List[Workout]:
+        """Get all workouts."""
+        return db.query(Workout).order_by(Workout.date.desc()).offset(skip).limit(limit).all()
+    
+    @staticmethod
+    def get_workout(db: Session, workout_id: int) -> Optional[Workout]:
+        """Get a specific workout by ID."""
+        return db.query(Workout).filter(Workout.id == workout_id).first()
+    
+    @staticmethod
+    def get_workouts_by_date(db: Session, target_date: date) -> List[Workout]:
+        """Get workouts for a specific date."""
+        return db.query(Workout).filter(
+            Workout.date >= target_date,
+            Workout.date < target_date.replace(day=target_date.day + 1)
+        ).all()
+    
+    @staticmethod
+    def create_workout(db: Session, workout: WorkoutCreate) -> Workout:
+        """Create a new workout with exercises."""
+        workout_data = workout.model_dump(exclude={'exercises'})
+        if not workout_data.get('date'):
+            workout_data['date'] = datetime.now()
+        
+        db_workout = Workout(**workout_data)
+        db.add(db_workout)
+        db.commit()
+        db.refresh(db_workout)
+        
+        # Add exercises
+        for exercise_data in workout.exercises:
+            db_workout_exercise = WorkoutExercise(
+                workout_id=db_workout.id,
+                exercise_id=exercise_data.exercise_id,
+                sets_data=[set_data.model_dump() for set_data in exercise_data.sets_data],
+                notes=exercise_data.notes
+            )
+            db.add(db_workout_exercise)
+        
+        db.commit()
+        db.refresh(db_workout)
+        return db_workout
+    
+    @staticmethod
+    def update_workout(db: Session, workout_id: int, workout: WorkoutUpdate) -> Optional[Workout]:
+        """Update a workout."""
+        db_workout = db.query(Workout).filter(Workout.id == workout_id).first()
+        if db_workout:
+            update_data = workout.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                setattr(db_workout, field, value)
+            db.commit()
+            db.refresh(db_workout)
+        return db_workout
+    
+    @staticmethod
+    def delete_workout(db: Session, workout_id: int) -> bool:
+        """Delete a workout and all its exercises."""
+        db_workout = db.query(Workout).filter(Workout.id == workout_id).first()
+        if db_workout:
+            db.delete(db_workout)
+            db.commit()
+            return True
+        return False 

@@ -1,7 +1,7 @@
 """Exercise and workout database models."""
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, Float, DateTime, String, Text, ForeignKey, JSON
+from sqlalchemy import Column, Integer, Float, DateTime, String, Text, ForeignKey, JSON, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -25,6 +25,23 @@ class Exercise(Base):
     
     def __repr__(self):
         return f"<Exercise(id={self.id}, name='{self.name}', category='{self.category}')>"
+
+
+class DailyActivity(Base):
+    """Daily activity tracking model."""
+    
+    __tablename__ = "daily_activities"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(DateTime, nullable=False, unique=True, default=func.now())
+    steps = Column(Integer)  # Total steps for the day (optional)
+    walk_yes_no = Column(Boolean)  # Whether a walk was taken (optional)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    def __repr__(self):
+        return f"<DailyActivity(id={self.id}, date={self.date}, steps={self.steps}, walk_yes_no={self.walk_yes_no})>"
 
 
 class Workout(Base):

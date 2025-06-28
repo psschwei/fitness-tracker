@@ -19,14 +19,43 @@ class ExerciseCreate(ExerciseBase):
 class ExerciseUpdate(BaseModel):
     """Schema for updating an exercise."""
     name: Optional[str] = Field(None, min_length=1, max_length=255, description="Exercise name")
-    category: Optional[str] = Field(None, description="Exercise category")
-    is_active: Optional[bool] = Field(None, description="Whether the exercise is active")
+    category: Optional[str] = Field(None, description="Exercise category (strength, cardio, flexibility)")
 
 
 class ExerciseResponse(ExerciseBase):
     """Schema for exercise response."""
     id: int
-    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Daily Activity Schemas
+class DailyActivityBase(BaseModel):
+    """Base daily activity schema."""
+    steps: Optional[int] = Field(None, ge=0, description="Total steps for the day")
+    walk_yes_no: Optional[bool] = Field(None, description="Whether a walk was taken")
+    notes: Optional[str] = Field(None, description="Activity notes")
+
+
+class DailyActivityCreate(DailyActivityBase):
+    """Schema for creating a new daily activity."""
+    date: Optional[datetime] = Field(None, description="Activity date (defaults to today)")
+
+
+class DailyActivityUpdate(BaseModel):
+    """Schema for updating a daily activity."""
+    steps: Optional[int] = Field(None, ge=0, description="Total steps for the day")
+    walk_yes_no: Optional[bool] = Field(None, description="Whether a walk was taken")
+    notes: Optional[str] = Field(None, description="Activity notes")
+
+
+class DailyActivityResponse(DailyActivityBase):
+    """Schema for daily activity response."""
+    id: int
+    date: datetime
     created_at: datetime
     updated_at: datetime
 
