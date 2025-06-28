@@ -4,7 +4,7 @@ import BodyCompositionForm from './BodyCompositionForm'
 import ExerciseForm from './ExerciseForm'
 import BatchExerciseForm from './BatchExerciseForm'
 import { useUnits } from '../../contexts/UnitContext'
-import { convertWeight, convertLength, formatWeight, formatLength } from '../../utils/units'
+import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI } from '../../utils/units'
 
 interface DailyEntryViewProps {
   entry: DailyEntry
@@ -85,13 +85,23 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={handleDeleteBodyComposition}
-                className="text-red-500 hover:text-red-700 text-sm font-medium"
-                title="Delete body composition entry"
-              >
-                Delete
-              </button>
+              <div className="flex flex-col items-end space-y-2">
+                <button
+                  onClick={handleDeleteBodyComposition}
+                  className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  title="Delete body composition entry"
+                >
+                  Delete
+                </button>
+                {entry.body_composition.height_inches && entry.body_composition.weight_pounds > 0 && (
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-gray-500">BMI</span>
+                    <p className="text-lg font-semibold text-blue-600">
+                      {entry.body_composition.bmi ? formatBMI(entry.body_composition.bmi) : 'Calculating...'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (

@@ -92,6 +92,7 @@ async def get_daily_entry(
             "height_inches": body_comp.height_inches,
             "waist_inches": body_comp.waist_inches,
             "neck_inches": body_comp.neck_inches,
+            "bmi": body_comp.bmi,
             "notes": body_comp.notes,
             "created_at": body_comp.created_at.isoformat(),
             "updated_at": body_comp.updated_at.isoformat()
@@ -162,6 +163,7 @@ async def get_daily_entries(
                 "height_inches": body_comp.height_inches,
                 "waist_inches": body_comp.waist_inches,
                 "neck_inches": body_comp.neck_inches,
+                "bmi": body_comp.bmi,
                 "notes": body_comp.notes,
                 "created_at": body_comp.created_at.isoformat(),
                 "updated_at": body_comp.updated_at.isoformat()

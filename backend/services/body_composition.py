@@ -8,6 +8,7 @@ import pandas as pd
 
 from backend.models.body_composition import BodyComposition
 from backend.schemas.body_composition import BodyCompositionCreate, BodyCompositionUpdate
+from backend.utils.bmi import calculate_bmi
 
 
 class BodyCompositionService:
@@ -18,12 +19,16 @@ class BodyCompositionService:
     
     def add_measurement(self, measurement_data: BodyCompositionCreate) -> BodyComposition:
         """Add a new body composition measurement."""
+        # Calculate BMI if we have both weight and height
+        bmi = calculate_bmi(measurement_data.weight_pounds, measurement_data.height_inches)
+        
         db_measurement = BodyComposition(
             date=measurement_data.date or datetime.now(),
             weight_pounds=measurement_data.weight_pounds,
             height_inches=measurement_data.height_inches,
             waist_inches=measurement_data.waist_inches,
             neck_inches=measurement_data.neck_inches,
+            bmi=bmi,
             notes=measurement_data.notes
         )
         

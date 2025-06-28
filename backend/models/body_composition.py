@@ -18,6 +18,7 @@ class BodyComposition(Base):
     height_inches = Column(Float)  # Height in inches
     waist_inches = Column(Float)  # Waist circumference in inches
     neck_inches = Column(Float)  # Neck circumference in inches
+    bmi = Column(Float)  # Calculated BMI
     notes = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
