@@ -2,21 +2,24 @@
 export interface BodyComposition {
   id: number
   date: string
-  weight: number
-  waist_circumference: number
+  weight_pounds: number
+  waist_inches: number | null
   created_at: string
   updated_at: string
+  notes?: string | null
 }
 
 export interface BodyCompositionCreate {
   date: string
-  weight: number
-  waist_circumference: number
+  weight_pounds: number
+  waist_inches: number | null
+  notes?: string | null
 }
 
 export interface BodyCompositionUpdate {
-  weight?: number
-  waist_circumference?: number
+  weight_pounds?: number
+  waist_inches?: number
+  notes?: string | null
 }
 
 // Exercise Types

@@ -10,8 +10,9 @@ interface BodyCompositionFormProps {
 function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   const [formData, setFormData] = useState<BodyCompositionCreate>({
     date,
-    weight: 0,
-    waist_circumference: 0,
+    weight_pounds: 0,
+    waist_inches: 0,
+    notes: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +20,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (formData.weight <= 0 || formData.waist_circumference <= 0) {
+    if (formData.weight_pounds <= 0 || (formData.waist_inches !== null && formData.waist_inches <= 0)) {
       setError('Please enter valid measurements')
       return
     }
@@ -37,7 +38,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
     }
   }
 
-  const handleInputChange = (field: keyof BodyCompositionCreate, value: number) => {
+  const handleInputChange = (field: keyof BodyCompositionCreate, value: number | string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -51,16 +52,16 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="weight_pounds" className="block text-sm font-medium text-gray-700 mb-1">
             Weight (lbs)
           </label>
           <input
             type="number"
-            id="weight"
+            id="weight_pounds"
             step="0.1"
             min="0"
-            value={formData.weight || ''}
-            onChange={(e) => handleInputChange('weight', parseFloat(e.target.value) || 0)}
+            value={formData.weight_pounds || ''}
+            onChange={(e) => handleInputChange('weight_pounds', parseFloat(e.target.value) || 0)}
             className="input"
             placeholder="0.0"
             required
@@ -68,21 +69,35 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
         </div>
 
         <div>
-          <label htmlFor="waist" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="waist_inches" className="block text-sm font-medium text-gray-700 mb-1">
             Waist Circumference (inches)
           </label>
           <input
             type="number"
-            id="waist"
+            id="waist_inches"
             step="0.1"
             min="0"
-            value={formData.waist_circumference || ''}
-            onChange={(e) => handleInputChange('waist_circumference', parseFloat(e.target.value) || 0)}
+            value={formData.waist_inches || ''}
+            onChange={(e) => handleInputChange('waist_inches', parseFloat(e.target.value) || 0)}
             className="input"
             placeholder="0.0"
             required
           />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+          Notes (optional)
+        </label>
+        <input
+          type="text"
+          id="notes"
+          value={formData.notes || ''}
+          onChange={(e) => handleInputChange('notes', e.target.value)}
+          className="input"
+          placeholder="Any notes..."
+        />
       </div>
 
       <button

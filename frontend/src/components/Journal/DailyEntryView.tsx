@@ -1,4 +1,5 @@
 import { DailyEntry } from '../../types'
+import { bodyCompositionApi, workoutApi } from '../../api/client'
 import BodyCompositionForm from './BodyCompositionForm'
 import ExerciseForm from './ExerciseForm'
 import BatchExerciseForm from './BatchExerciseForm'
@@ -10,6 +11,33 @@ interface DailyEntryViewProps {
 
 function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
   const workouts = entry.workouts ?? []
+
+  const handleDeleteBodyComposition = async () => {
+    if (!entry.body_composition) return
+    
+    if (confirm('Are you sure you want to delete this body composition entry?')) {
+      try {
+        await bodyCompositionApi.delete(entry.body_composition.id)
+        onUpdate()
+      } catch (err) {
+        console.error('Error deleting body composition:', err)
+        alert('Failed to delete body composition entry')
+      }
+    }
+  }
+
+  const handleDeleteWorkout = async (workoutId: number) => {
+    if (confirm('Are you sure you want to delete this entire workout?')) {
+      try {
+        await workoutApi.delete(workoutId)
+        onUpdate()
+      } catch (err) {
+        console.error('Error deleting workout:', err)
+        alert('Failed to delete workout')
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Body Composition Section */}
@@ -18,19 +46,28 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
         
         {entry.body_composition ? (
           <div className="bg-gray-50 rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm font-medium text-gray-500">Weight</span>
-                <p className="text-lg font-semibold text-gray-900">
-                  {entry.body_composition.weight} lbs
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Weight</span>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {entry.body_composition.weight} lbs
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Waist Circumference</span>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {entry.body_composition.waist_circumference} inches
+                  </p>
+                </div>
               </div>
-              <div>
-                <span className="text-sm font-medium text-gray-500">Waist Circumference</span>
-                <p className="text-lg font-semibold text-gray-900">
-                  {entry.body_composition.waist_circumference} inches
-                </p>
-              </div>
+              <button
+                onClick={handleDeleteBodyComposition}
+                className="text-red-500 hover:text-red-700 text-sm font-medium"
+                title="Delete body composition entry"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ) : (
@@ -56,6 +93,16 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
           <div className="space-y-4">
             {workouts.map((workout) => (
               <div key={workout.id} className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-gray-700">Workout</h3>
+                  <button
+                    onClick={() => handleDeleteWorkout(workout.id)}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                    title="Delete entire workout"
+                  >
+                    Delete Workout
+                  </button>
+                </div>
                 <div className="space-y-3">
                   {workout.exercises.map((exercise) => (
                     <div key={exercise.id} className="flex items-center justify-between bg-white rounded p-3">

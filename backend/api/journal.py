@@ -12,11 +12,32 @@ from backend.services.exercise import ExerciseService
 from pydantic import BaseModel
 
 
+class WorkoutExercise(BaseModel):
+    """Schema for a workout exercise."""
+    id: int
+    workout_id: int
+    exercise_id: int
+    exercise_name: str
+    weight: float
+    reps_per_set: int
+    created_at: str
+    updated_at: str
+
+
+class Workout(BaseModel):
+    """Schema for a workout."""
+    id: int
+    date: str
+    created_at: str
+    updated_at: str
+    exercises: List[WorkoutExercise]
+
+
 class DailyEntry(BaseModel):
     """Schema for a daily journal entry."""
-    date: date
+    date: str
     body_composition: Optional[dict] = None
-    exercises: List[dict] = []
+    workouts: List[Workout] = []
     notes: Optional[str] = None
 
 
@@ -38,24 +59,41 @@ async def get_daily_entry(
     # Get workouts for the date
     workouts = exercise_service.get_workouts_by_date(entry_date)
     
-    # Format exercises for the day
-    exercises = []
+    # Format workouts for the day
+    formatted_workouts = []
     for workout in workouts:
+        exercises = []
         for exercise in workout.exercises:
-            exercises.append({
-                "exercise_name": exercise.exercise.name,
-                "sets": exercise.sets_data,
-                "notes": exercise.notes
-            })
+            exercises.append(WorkoutExercise(
+                id=exercise.id,
+                workout_id=workout.id,
+                exercise_id=exercise.exercise_id,
+                exercise_name=exercise.exercise.name,
+                weight=exercise.weight,
+                reps_per_set=exercise.reps_per_set,
+                created_at=exercise.created_at.isoformat(),
+                updated_at=exercise.updated_at.isoformat()
+            ))
+        
+        formatted_workouts.append(Workout(
+            id=workout.id,
+            date=workout.date.isoformat(),
+            created_at=workout.created_at.isoformat(),
+            updated_at=workout.updated_at.isoformat(),
+            exercises=exercises
+        ))
     
     return DailyEntry(
-        date=entry_date,
+        date=entry_date.isoformat(),
         body_composition={
-            "weight_pounds": body_comp.weight_pounds,
-            "waist_inches": body_comp.waist_inches,
-            "notes": body_comp.notes
+            "id": body_comp.id,
+            "date": body_comp.date.isoformat(),
+            "weight": body_comp.weight_pounds,
+            "waist_circumference": body_comp.waist_inches,
+            "created_at": body_comp.created_at.isoformat(),
+            "updated_at": body_comp.updated_at.isoformat()
         } if body_comp else None,
-        exercises=exercises,
+        workouts=formatted_workouts,
         notes=", ".join([w.notes for w in workouts if w.notes]) if workouts else None
     )
 
@@ -88,24 +126,41 @@ async def get_daily_entries(
         # Get workouts for the date
         workouts = exercise_service.get_workouts_by_date(current_date)
         
-        # Format exercises for the day
-        exercises = []
+        # Format workouts for the day
+        formatted_workouts = []
         for workout in workouts:
+            exercises = []
             for exercise in workout.exercises:
-                exercises.append({
-                    "exercise_name": exercise.exercise.name,
-                    "sets": exercise.sets_data,
-                    "notes": exercise.notes
-                })
+                exercises.append(WorkoutExercise(
+                    id=exercise.id,
+                    workout_id=workout.id,
+                    exercise_id=exercise.exercise_id,
+                    exercise_name=exercise.exercise.name,
+                    weight=exercise.weight,
+                    reps_per_set=exercise.reps_per_set,
+                    created_at=exercise.created_at.isoformat(),
+                    updated_at=exercise.updated_at.isoformat()
+                ))
+            
+            formatted_workouts.append(Workout(
+                id=workout.id,
+                date=workout.date.isoformat(),
+                created_at=workout.created_at.isoformat(),
+                updated_at=workout.updated_at.isoformat(),
+                exercises=exercises
+            ))
         
         entries.append(DailyEntry(
-            date=current_date,
+            date=current_date.isoformat(),
             body_composition={
-                "weight_pounds": body_comp.weight_pounds,
-                "waist_inches": body_comp.waist_inches,
-                "notes": body_comp.notes
+                "id": body_comp.id,
+                "date": body_comp.date.isoformat(),
+                "weight": body_comp.weight_pounds,
+                "waist_circumference": body_comp.waist_inches,
+                "created_at": body_comp.created_at.isoformat(),
+                "updated_at": body_comp.updated_at.isoformat()
             } if body_comp else None,
-            exercises=exercises,
+            workouts=formatted_workouts,
             notes=", ".join([w.notes for w in workouts if w.notes]) if workouts else None
         ))
         

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { format, subDays, addDays } from 'date-fns'
 import { DailyEntry } from '../types'
-import { journalApi } from '../api/client'
+import { journalApi, bodyCompositionApi, workoutApi } from '../api/client'
 import DateNavigation from '../components/Journal/DateNavigation'
 import DailyEntryView from '../components/Journal/DailyEntryView'
 
@@ -47,6 +47,43 @@ function Journal() {
     loadDailyEntry()
   }
 
+  const handleDeleteDay = async () => {
+    if (!dailyEntry) return
+
+    const hasData = dailyEntry.body_composition || dailyEntry.workouts.length > 0
+    if (!hasData) {
+      alert('No data to delete for this day')
+      return
+    }
+
+    const confirmMessage = `Are you sure you want to delete ALL data for ${format(currentDate, 'MMMM d, yyyy')}?\n\nThis will delete:\n` +
+      (dailyEntry.body_composition ? '• Body composition entry\n' : '') +
+      (dailyEntry.workouts.length > 0 ? `• ${dailyEntry.workouts.length} workout(s) with ${dailyEntry.workouts.reduce((total, w) => total + w.exercises.length, 0)} exercise(s)\n` : '') +
+      '\nThis action cannot be undone.'
+
+    if (confirm(confirmMessage)) {
+      try {
+        const deletePromises = []
+
+        // Delete body composition if it exists
+        if (dailyEntry.body_composition) {
+          deletePromises.push(bodyCompositionApi.delete(dailyEntry.body_composition.id))
+        }
+
+        // Delete all workouts for this day
+        dailyEntry.workouts.forEach(workout => {
+          deletePromises.push(workoutApi.delete(workout.id))
+        })
+
+        await Promise.all(deletePromises)
+        loadDailyEntry() // Reload to show empty state
+      } catch (err) {
+        console.error('Error deleting day:', err)
+        alert('Failed to delete day data')
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -67,6 +104,15 @@ function Journal() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Daily Journal</h1>
+        {dailyEntry && (dailyEntry.body_composition || dailyEntry.workouts.length > 0) && (
+          <button
+            onClick={handleDeleteDay}
+            className="btn bg-red-600 hover:bg-red-700 text-white text-sm"
+            title="Delete all data for this day"
+          >
+            Delete Day
+          </button>
+        )}
       </div>
 
       <DateNavigation
