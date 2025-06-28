@@ -6,17 +6,13 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 
 ### Body Composition Tracking
 - Weight measurements with date/time tracking
-- Body fat percentage, muscle mass, body water percentage
-- Bone mass and visceral fat tracking
-- BMI calculation
-- Body measurements (chest, waist, arms, legs, etc.)
+- Waist circumference tracking
 - Progress charts and trend analysis
 - Goal setting and progress tracking
 
 ### Exercise Tracking
 - Comprehensive workout logging with exercises, sets, reps, and weights
 - Exercise library with common exercises
-- Workout templates and routines
 - Progress tracking for individual exercises
 - One-rep max calculations
 - Workout frequency and duration tracking
@@ -34,7 +30,7 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 ### Tech Stack
 - **Backend**: Python FastAPI with SQLAlchemy ORM
 - **Database**: SQLite (local file-based)
-- **Frontend**: React (minimal UI components)
+- **Frontend**: React with TypeScript and Tailwind CSS
 - **Desktop**: Tauri (Rust-based desktop wrapper)
 - **Data Processing**: Python pandas, numpy for analytics
 - **Charts**: Python plotly for server-side chart generation
@@ -42,7 +38,7 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 ### Data Flow
 1. **Python Backend**: Handles all business logic, data processing, and analytics
 2. **SQLite Database**: Local file storage with automatic backup
-3. **React Frontend**: Minimal UI for data entry and display
+3. **React Frontend**: Modern UI for data entry and display
 4. **Tauri Desktop**: Lightweight desktop wrapper for system integration
 
 ## Installation
@@ -77,7 +73,7 @@ A local-first, offline fitness tracking application built with Python FastAPI ba
 
 The API will be available at `http://localhost:8000`
 
-### Frontend Setup (Coming Soon)
+### Frontend Setup
 
 1. **Install frontend dependencies**:
    ```bash
@@ -89,6 +85,29 @@ The API will be available at `http://localhost:8000`
    ```bash
    npm run dev
    ```
+
+The frontend will be available at `http://localhost:3000`
+
+### Running Both Services
+
+To run the complete application, you need both the backend and frontend running simultaneously:
+
+1. **Terminal 1 - Backend**:
+   ```bash
+   # From the project root
+   uv run python -m backend.main
+   ```
+
+2. **Terminal 2 - Frontend**:
+   ```bash
+   # From the project root
+   cd frontend
+   npm run dev
+   ```
+
+3. **Access the application**:
+   - Frontend: http://localhost:3000
+   - Backend API docs: http://localhost:8000/docs
 
 ### Tauri Desktop App (Coming Soon)
 
@@ -140,14 +159,12 @@ The application uses SQLite for local data storage. The database file is automat
 ### Database Schema
 
 #### Body Composition
-- `body_composition` - Weight, body fat, muscle mass measurements
-- `body_measurements` - Body measurements (chest, waist, etc.)
+- `body_composition` - Weight and waist circumference measurements
 
 #### Exercise
 - `exercises` - Exercise library
 - `workouts` - Workout sessions
 - `workout_exercises` - Exercise sets within workouts
-- `workout_templates` - Reusable workout templates
 
 #### Goals
 - `goals` - Fitness goals and progress tracking
@@ -164,7 +181,14 @@ fitness-tracker/
 │   ├── schemas/            # Pydantic schemas
 │   ├── services/           # Business logic
 │   └── api/                # API routers
-├── frontend/               # React frontend (coming soon)
+├── frontend/               # React frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── pages/          # Page components
+│   │   ├── api/            # API client
+│   │   └── types/          # TypeScript types
+│   ├── package.json        # Frontend dependencies
+│   └── README.md           # Frontend documentation
 ├── src-tauri/              # Tauri desktop wrapper (coming soon)
 ├── pyproject.toml          # Python project configuration
 └── README.md              # This file
@@ -179,6 +203,20 @@ uv run pytest tests/
 ```bash
 uv run black backend/
 uv run isort backend/
+```
+
+### Frontend Development
+
+The frontend uses Vite for fast development and building:
+
+```bash
+cd frontend
+
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
 ```
 
 ## Contributing
@@ -202,11 +240,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [x] Exercise and workout tracking
 - [x] Analytics and chart generation
 
-### Phase 2: Frontend Development
-- [ ] React frontend with TypeScript
-- [ ] Responsive UI design
-- [ ] Data entry forms
-- [ ] Chart visualization
+### Phase 2: Frontend Development ✅
+- [x] React frontend with TypeScript
+- [x] Responsive UI design
+- [x] Data entry forms
+- [x] Chart visualization
+- [x] Daily journal view
+- [x] Date navigation
+- [x] Body composition forms
+- [x] Exercise entry (single and batch)
 
 ### Phase 3: Desktop Integration
 - [ ] Tauri desktop wrapper
