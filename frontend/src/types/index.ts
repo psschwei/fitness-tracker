@@ -7,6 +7,8 @@ export interface BodyComposition {
   waist_inches: number | null
   neck_inches: number | null
   bmi: number | null
+  body_fat_percentage: number | null
+  is_male: boolean
   created_at: string
   updated_at: string
   notes?: string | null
@@ -19,6 +21,8 @@ export interface BodyCompositionCreate {
   waist_inches: number | null
   neck_inches: number | null
   bmi?: number | null
+  body_fat_percentage?: number | null
+  is_male: boolean
   notes?: string | null
 }
 
@@ -28,6 +32,8 @@ export interface BodyCompositionUpdate {
   waist_inches?: number | null
   neck_inches?: number | null
   bmi?: number | null
+  body_fat_percentage?: number | null
+  is_male?: boolean
   notes?: string | null
 }
 

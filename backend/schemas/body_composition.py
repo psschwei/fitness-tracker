@@ -12,6 +12,8 @@ class BodyCompositionBase(BaseModel):
     waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
     neck_inches: Optional[float] = Field(None, gt=0, description="Neck circumference in inches")
     bmi: Optional[float] = Field(None, description="Calculated BMI")
+    body_fat_percentage: Optional[float] = Field(None, description="Calculated body fat percentage")
+    is_male: bool = Field(True, description="Gender for body fat calculation")
     notes: Optional[str] = Field(None, description="Additional notes")
 
 
@@ -27,6 +29,8 @@ class BodyCompositionUpdate(BaseModel):
     waist_inches: Optional[float] = Field(None, gt=0, description="Waist circumference in inches")
     neck_inches: Optional[float] = Field(None, gt=0, description="Neck circumference in inches")
     bmi: Optional[float] = Field(None, description="Calculated BMI")
+    body_fat_percentage: Optional[float] = Field(None, description="Calculated body fat percentage")
+    is_male: Optional[bool] = Field(None, description="Gender for body fat calculation")
     notes: Optional[str] = Field(None, description="Additional notes")
 
 

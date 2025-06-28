@@ -17,6 +17,9 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
     height_inches: null,
     waist_inches: null,
     neck_inches: null,
+    bmi: null,
+    body_fat_percentage: null,
+    is_male: true,
     notes: '',
   })
   const [displayWeight, setDisplayWeight] = useState(0)
@@ -95,6 +98,9 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
         height_inches: null,
         waist_inches: null,
         neck_inches: null,
+        bmi: null,
+        body_fat_percentage: null,
+        is_male: true,
         notes: '',
       })
       
@@ -198,6 +204,36 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
             placeholder="0.0"
             required
           />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Gender (for body fat calculation)
+        </label>
+        <div className="flex space-x-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              checked={formData.is_male}
+              onChange={() => setFormData(prev => ({ ...prev, is_male: true }))}
+              className="mr-2"
+            />
+            Male
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              checked={!formData.is_male}
+              onChange={() => setFormData(prev => ({ ...prev, is_male: false }))}
+              className="mr-2"
+            />
+            Female
+          </label>
         </div>
       </div>
 

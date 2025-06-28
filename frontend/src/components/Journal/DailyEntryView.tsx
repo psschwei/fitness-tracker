@@ -4,7 +4,7 @@ import BodyCompositionForm from './BodyCompositionForm'
 import ExerciseForm from './ExerciseForm'
 import BatchExerciseForm from './BatchExerciseForm'
 import { useUnits } from '../../contexts/UnitContext'
-import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI } from '../../utils/units'
+import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI, formatBodyFat } from '../../utils/units'
 
 interface DailyEntryViewProps {
   entry: DailyEntry
@@ -98,6 +98,17 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                     <span className="text-sm font-medium text-gray-500">BMI</span>
                     <p className="text-lg font-semibold text-blue-600">
                       {entry.body_composition.bmi ? formatBMI(entry.body_composition.bmi) : 'Calculating...'}
+                    </p>
+                  </div>
+                )}
+                {entry.body_composition.waist_inches && entry.body_composition.neck_inches && entry.body_composition.height_inches && (
+                  <div className="text-right">
+                    <span className="text-sm font-medium text-gray-500">Body Fat</span>
+                    <p className="text-lg font-semibold text-green-600">
+                      {entry.body_composition.body_fat_percentage ? 
+                        formatBodyFat(entry.body_composition.body_fat_percentage, entry.body_composition.is_male) : 
+                        'Calculating...'
+                      }
                     </p>
                   </div>
                 )}

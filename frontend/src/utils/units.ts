@@ -105,4 +105,68 @@ export const formatBMI = (bmi: number | null): string => {
   if (bmi === null) return 'Not available'
   const category = getBMICategory(bmi)
   return `${bmi.toFixed(1)} (${category})`
+}
+
+// Body fat calculation using Navy tape test
+export const calculateBodyFat = (waist_inches: number | null, neck_inches: number | null, 
+                                height_inches: number | null, is_male: boolean = true): number | null => {
+  if (!waist_inches || !neck_inches || !height_inches) {
+    return null
+  }
+  
+  if (waist_inches <= 0 || neck_inches <= 0 || height_inches <= 0) {
+    return null
+  }
+  
+  if (is_male) {
+    // Male formula: 86.010 × log10(waist - neck) - 70.041 × log10(height) + 36.76
+    if (waist_inches <= neck_inches) {
+      return null // Invalid measurements for male
+    }
+    
+    const waistNeckDiff = waist_inches - neck_inches
+    if (waistNeckDiff <= 0) {
+      return null
+    }
+    
+    const bodyFat = (86.010 * Math.log10(waistNeckDiff)) - (70.041 * Math.log10(height_inches)) + 36.76
+    
+    // The result is already the body fat percentage
+    const result = bodyFat
+    
+    // Ensure reasonable range (0-50%)
+    if (result < 0 || result > 50) {
+      return null
+    }
+    
+    return Math.round(result * 10) / 10
+  } else {
+    // For females, we need hip measurement which we don't have
+    // For now, return null for females
+    return null
+  }
+}
+
+// Get body fat category
+export const getBodyFatCategory = (bodyFat: number, isMale: boolean = true): string => {
+  if (isMale) {
+    if (bodyFat < 6) return 'Essential fat'
+    if (bodyFat < 14) return 'Athlete'
+    if (bodyFat < 18) return 'Fitness'
+    if (bodyFat < 25) return 'Average'
+    return 'Obese'
+  } else {
+    if (bodyFat < 14) return 'Essential fat'
+    if (bodyFat < 21) return 'Athlete'
+    if (bodyFat < 25) return 'Fitness'
+    if (bodyFat < 32) return 'Average'
+    return 'Obese'
+  }
+}
+
+// Format body fat with category
+export const formatBodyFat = (bodyFat: number | null, isMale: boolean = true): string => {
+  if (bodyFat === null) return 'Not available'
+  const category = getBodyFatCategory(bodyFat, isMale)
+  return `${bodyFat.toFixed(1)}% (${category})`
 } 

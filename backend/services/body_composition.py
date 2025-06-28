@@ -9,6 +9,7 @@ import pandas as pd
 from backend.models.body_composition import BodyComposition
 from backend.schemas.body_composition import BodyCompositionCreate, BodyCompositionUpdate
 from backend.utils.bmi import calculate_bmi
+from backend.utils.body_fat import calculate_body_fat_percentage
 
 
 class BodyCompositionService:
@@ -22,6 +23,14 @@ class BodyCompositionService:
         # Calculate BMI if we have both weight and height
         bmi = calculate_bmi(measurement_data.weight_pounds, measurement_data.height_inches)
         
+        # Calculate body fat percentage using Navy tape test
+        body_fat = calculate_body_fat_percentage(
+            measurement_data.waist_inches, 
+            measurement_data.neck_inches, 
+            measurement_data.height_inches,
+            measurement_data.is_male
+        )
+        
         db_measurement = BodyComposition(
             date=measurement_data.date or datetime.now(),
             weight_pounds=measurement_data.weight_pounds,
@@ -29,6 +38,8 @@ class BodyCompositionService:
             waist_inches=measurement_data.waist_inches,
             neck_inches=measurement_data.neck_inches,
             bmi=bmi,
+            body_fat_percentage=body_fat,
+            is_male=measurement_data.is_male,
             notes=measurement_data.notes
         )
         
