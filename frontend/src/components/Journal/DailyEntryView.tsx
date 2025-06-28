@@ -3,6 +3,8 @@ import { bodyCompositionApi, workoutApi } from '../../api/client'
 import BodyCompositionForm from './BodyCompositionForm'
 import ExerciseForm from './ExerciseForm'
 import BatchExerciseForm from './BatchExerciseForm'
+import { useUnits } from '../../contexts/UnitContext'
+import { convertWeight, convertLength, formatWeight, formatLength } from '../../utils/units'
 
 interface DailyEntryViewProps {
   entry: DailyEntry
@@ -10,6 +12,7 @@ interface DailyEntryViewProps {
 }
 
 function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
+  const { units } = useUnits()
   const workouts = entry.workouts ?? []
 
   const handleDeleteBodyComposition = async () => {
@@ -51,13 +54,16 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                 <div>
                   <span className="text-sm font-medium text-gray-500">Weight</span>
                   <p className="text-lg font-semibold text-gray-900">
-                    {entry.body_composition.weight} lbs
+                    {formatWeight(convertWeight(entry.body_composition.weight_pounds, 'lbs', units.bodyWeight), units.bodyWeight)}
                   </p>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-500">Waist Circumference</span>
                   <p className="text-lg font-semibold text-gray-900">
-                    {entry.body_composition.waist_circumference} inches
+                    {entry.body_composition.waist_inches ? 
+                      formatLength(convertLength(entry.body_composition.waist_inches, 'inches', units.length), units.length) :
+                      'Not recorded'
+                    }
                   </p>
                 </div>
               </div>
@@ -109,7 +115,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                       <div>
                         <h3 className="font-medium text-gray-900">{exercise.exercise_name}</h3>
                         <p className="text-sm text-gray-500">
-                          {exercise.weight} lbs × {exercise.reps_per_set} reps
+                          {formatWeight(convertWeight(exercise.weight, 'lbs', units.exerciseWeight), units.exerciseWeight)} × {exercise.reps_per_set} reps
                         </p>
                       </div>
                       <button className="text-red-500 hover:text-red-700 text-sm">

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Exercise, WorkoutCreate } from '../../types'
 import { exerciseApi, workoutApi } from '../../api/client'
+import { useUnits } from '../../contexts/UnitContext'
+import { convertWeight, getWeightUnitSymbol } from '../../utils/units'
 
 interface ExerciseEntry {
   exercise_id: number
   weight: number
   reps_per_set: number
+  display_weight: number
 }
 
 interface BatchExerciseFormProps {
@@ -14,9 +17,10 @@ interface BatchExerciseFormProps {
 }
 
 function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
+  const { units } = useUnits()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>([
-    { exercise_id: 0, weight: 0, reps_per_set: 0 }
+    { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }
   ])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,6 +28,16 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   useEffect(() => {
     loadExercises()
   }, [])
+
+  // Convert display weights to backend units when units change
+  useEffect(() => {
+    setExerciseEntries(prev => 
+      prev.map(entry => ({
+        ...entry,
+        weight: convertWeight(entry.display_weight, units.exerciseWeight, 'lbs')
+      }))
+    )
+  }, [units.exerciseWeight])
 
   const loadExercises = async () => {
     try {
@@ -35,7 +49,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   }
 
   const addExerciseEntry = () => {
-    setExerciseEntries(prev => [...prev, { exercise_id: 0, weight: 0, reps_per_set: 0 }])
+    setExerciseEntries(prev => [...prev, { exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }])
   }
 
   const removeExerciseEntry = (index: number) => {
@@ -44,9 +58,17 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
   const updateExerciseEntry = (index: number, field: keyof ExerciseEntry, value: number) => {
     setExerciseEntries(prev => 
-      prev.map((entry, i) => 
-        i === index ? { ...entry, [field]: value } : entry
-      )
+      prev.map((entry, i) => {
+        if (i === index) {
+          const updated = { ...entry, [field]: value }
+          // If updating display_weight, also update the backend weight
+          if (field === 'display_weight') {
+            updated.weight = convertWeight(value, units.exerciseWeight, 'lbs')
+          }
+          return updated
+        }
+        return entry
+      })
     )
   }
 
@@ -68,10 +90,18 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       
       const workoutData: WorkoutCreate = {
         date,
-        exercises: validEntries,
+        exercises: validEntries.map(entry => ({
+          exercise_id: entry.exercise_id,
+          weight: entry.weight,
+          reps_per_set: entry.reps_per_set
+        })),
       }
       
       await workoutApi.create(workoutData)
+      
+      // Reset form
+      setExerciseEntries([{ exercise_id: 0, weight: 0, reps_per_set: 0, display_weight: 0 }])
+      
       onSuccess()
     } catch (err) {
       setError('Failed to save exercises')
@@ -127,14 +157,14 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (lbs)
+                  Weight ({getWeightUnitSymbol(units.exerciseWeight)})
                 </label>
                 <input
                   type="number"
                   step="0.5"
                   min="0"
-                  value={entry.weight || ''}
-                  onChange={(e) => updateExerciseEntry(index, 'weight', parseFloat(e.target.value) || 0)}
+                  value={entry.display_weight || ''}
+                  onChange={(e) => updateExerciseEntry(index, 'display_weight', parseFloat(e.target.value) || 0)}
                   className="input"
                   placeholder="0"
                   required

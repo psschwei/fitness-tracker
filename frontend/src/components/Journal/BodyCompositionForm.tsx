@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BodyCompositionCreate } from '../../types'
 import { bodyCompositionApi } from '../../api/client'
+import { useUnits } from '../../contexts/UnitContext'
+import { convertWeight, convertLength, getWeightUnitSymbol, getLengthUnitSymbol } from '../../utils/units'
 
 interface BodyCompositionFormProps {
   date: string
@@ -8,14 +10,26 @@ interface BodyCompositionFormProps {
 }
 
 function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
+  const { units } = useUnits()
   const [formData, setFormData] = useState<BodyCompositionCreate>({
     date,
     weight_pounds: 0,
     waist_inches: 0,
     notes: '',
   })
+  const [displayWeight, setDisplayWeight] = useState(0)
+  const [displayWaist, setDisplayWaist] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Convert display values to backend units when units change
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      weight_pounds: convertWeight(displayWeight, units.bodyWeight, 'lbs'),
+      waist_inches: displayWaist > 0 ? convertLength(displayWaist, units.length, 'inches') : 0
+    }))
+  }, [units.bodyWeight, units.length, displayWeight, displayWaist])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,6 +43,17 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       setLoading(true)
       setError(null)
       await bodyCompositionApi.create(formData)
+      
+      // Reset form
+      setDisplayWeight(0)
+      setDisplayWaist(0)
+      setFormData({
+        date,
+        weight_pounds: 0,
+        waist_inches: 0,
+        notes: '',
+      })
+      
       onSuccess()
     } catch (err) {
       setError('Failed to save body composition data')
@@ -39,7 +64,13 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   }
 
   const handleInputChange = (field: keyof BodyCompositionCreate, value: number | string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'weight_pounds') {
+      setDisplayWeight(value as number)
+    } else if (field === 'waist_inches') {
+      setDisplayWaist(value as number)
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   return (
@@ -53,14 +84,14 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="weight_pounds" className="block text-sm font-medium text-gray-700 mb-1">
-            Weight (lbs)
+            Weight ({getWeightUnitSymbol(units.bodyWeight)})
           </label>
           <input
             type="number"
             id="weight_pounds"
             step="0.1"
             min="0"
-            value={formData.weight_pounds || ''}
+            value={displayWeight || ''}
             onChange={(e) => handleInputChange('weight_pounds', parseFloat(e.target.value) || 0)}
             className="input"
             placeholder="0.0"
@@ -70,14 +101,14 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
 
         <div>
           <label htmlFor="waist_inches" className="block text-sm font-medium text-gray-700 mb-1">
-            Waist Circumference (inches)
+            Waist Circumference ({getLengthUnitSymbol(units.length)})
           </label>
           <input
             type="number"
             id="waist_inches"
             step="0.1"
             min="0"
-            value={formData.waist_inches || ''}
+            value={displayWaist || ''}
             onChange={(e) => handleInputChange('waist_inches', parseFloat(e.target.value) || 0)}
             className="input"
             placeholder="0.0"

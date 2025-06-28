@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Exercise, WorkoutCreate, WorkoutExerciseCreate } from '../../types'
 import { exerciseApi, workoutApi } from '../../api/client'
+import { useUnits } from '../../contexts/UnitContext'
+import { convertWeight, getWeightUnitSymbol } from '../../utils/units'
 
 interface ExerciseFormProps {
   date: string
@@ -8,6 +10,7 @@ interface ExerciseFormProps {
 }
 
 function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
+  const { units } = useUnits()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [exerciseInput, setExerciseInput] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
@@ -17,12 +20,21 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
     weight: 0,
     reps_per_set: 0,
   })
+  const [displayWeight, setDisplayWeight] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadExercises()
   }, [])
+
+  // Convert display weight to backend units when units change
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      weight: convertWeight(displayWeight, units.exerciseWeight, 'lbs')
+    }))
+  }, [units.exerciseWeight, displayWeight])
 
   const loadExercises = async () => {
     try {
@@ -91,6 +103,7 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
       // Reset form
       setExerciseInput('')
       setSelectedExerciseId(null)
+      setDisplayWeight(0)
       setFormData({
         exercise_id: 0,
         weight: 0,
@@ -110,7 +123,11 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
   }
 
   const handleInputChange = (field: keyof WorkoutExerciseCreate, value: number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'weight') {
+      setDisplayWeight(value)
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   return (
@@ -178,14 +195,14 @@ function ExerciseForm({ date, onSuccess }: ExerciseFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
-            Weight (lbs)
+            Weight ({getWeightUnitSymbol(units.exerciseWeight)})
           </label>
           <input
             type="number"
             id="weight"
             step="0.5"
             min="0"
-            value={formData.weight || ''}
+            value={displayWeight || ''}
             onChange={(e) => handleInputChange('weight', parseFloat(e.target.value) || 0)}
             className="input"
             placeholder="0"

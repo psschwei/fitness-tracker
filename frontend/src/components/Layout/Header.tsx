@@ -1,7 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useUnits } from '../../contexts/UnitContext'
 
 function Header() {
   const location = useLocation()
+  const { units, toggleBodyWeightUnit, toggleExerciseWeightUnit, toggleLengthUnit } = useUnits()
 
   const navItems = [
     { path: '/', label: 'Journal' },
@@ -18,21 +20,48 @@ function Header() {
             </h1>
           </div>
           
-          <nav className="flex space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  location.pathname === item.path
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+          <div className="flex items-center space-x-4">
+            {/* Unit toggles */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleBodyWeightUnit}
+                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
+                title="Toggle body weight units"
               >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+                Body: {units.bodyWeight}
+              </button>
+              <button
+                onClick={toggleExerciseWeightUnit}
+                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
+                title="Toggle exercise weight units"
+              >
+                Exercise: {units.exerciseWeight}
+              </button>
+              <button
+                onClick={toggleLengthUnit}
+                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
+                title="Toggle length units"
+              >
+                {units.length === 'inches' ? 'in' : 'cm'}
+              </button>
+            </div>
+            
+            <nav className="flex space-x-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    location.pathname === item.path
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
     </header>
