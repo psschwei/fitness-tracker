@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BodyCompositionCreate } from '../../types'
+import { BodyCompositionCreate, BodyComposition } from '../../types'
 import { bodyCompositionApi } from '../../api/client'
 import { useUnits } from '../../contexts/UnitContext'
 import { convertWeight, convertLength, getWeightUnitSymbol, getLengthUnitSymbol } from '../../utils/units'
@@ -21,6 +21,34 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   const [displayWaist, setDisplayWaist] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Load latest body composition data to pre-populate form
+  useEffect(() => {
+    loadLatestData()
+  }, [units.bodyWeight, units.length])
+
+  const loadLatestData = async () => {
+    try {
+      const latestData = await bodyCompositionApi.getLatest()
+      
+      // Convert backend units to display units
+      const displayWeightValue = convertWeight(latestData.weight_pounds, 'lbs', units.bodyWeight)
+      const displayWaistValue = latestData.waist_inches ? convertLength(latestData.waist_inches, 'inches', units.length) : 0
+      
+      setDisplayWeight(displayWeightValue)
+      setDisplayWaist(displayWaistValue)
+      
+      setFormData(prev => ({
+        ...prev,
+        weight_pounds: latestData.weight_pounds,
+        waist_inches: latestData.waist_inches || 0,
+        notes: latestData.notes || ''
+      }))
+    } catch (err) {
+      // If no previous data exists, that's fine - form will start empty
+      console.log('No previous body composition data found')
+    }
+  }
 
   // Convert display values to backend units when units change
   useEffect(() => {
