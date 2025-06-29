@@ -31,7 +31,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       exercise_id: 0, 
       weight: 0, 
       reps_per_set: 0, 
-      sets: 1,
+      sets: 0,
       display_weight: 0, 
       notes: '',
       isSaved: false
@@ -72,7 +72,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       exercise_id: 0, 
       weight: 0, 
       reps_per_set: 0, 
-      sets: 1,
+      sets: 0,
       display_weight: 0, 
       notes: '',
       isSaved: false
@@ -343,7 +343,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reps per Set
+                  Reps
                 </label>
                 <input
                   type="number"
@@ -366,7 +366,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
                   value={entry.sets || ''}
                   onChange={(e) => updateExerciseEntry(index, 'sets', parseInt(e.target.value) || 0)}
                   className="input"
-                  placeholder="0"
+                  placeholder="1"
                   required
                 />
               </div>

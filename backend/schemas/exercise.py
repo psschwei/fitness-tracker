@@ -37,6 +37,7 @@ class DailyActivityBase(BaseModel):
     """Base daily activity schema."""
     steps: Optional[int] = Field(None, ge=0, description="Total steps for the day")
     walk_yes_no: Optional[bool] = Field(None, description="Whether a walk was taken")
+    mobility_yes_no: Optional[bool] = Field(None, description="Whether a mobility session was done")
     notes: Optional[str] = Field(None, description="Activity notes")
 
 
@@ -49,6 +50,7 @@ class DailyActivityUpdate(BaseModel):
     """Schema for updating a daily activity."""
     steps: Optional[int] = Field(None, ge=0, description="Total steps for the day")
     walk_yes_no: Optional[bool] = Field(None, description="Whether a walk was taken")
+    mobility_yes_no: Optional[bool] = Field(None, description="Whether a mobility session was done")
     notes: Optional[str] = Field(None, description="Activity notes")
 
 

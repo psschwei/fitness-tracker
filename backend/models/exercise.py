@@ -36,12 +36,13 @@ class DailyActivity(Base):
     date = Column(DateTime, nullable=False, unique=True, default=func.now())
     steps = Column(Integer)  # Total steps for the day (optional)
     walk_yes_no = Column(Boolean)  # Whether a walk was taken (optional)
+    mobility_yes_no = Column(Boolean)  # Whether a mobility session was done (optional)
     notes = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
     def __repr__(self):
-        return f"<DailyActivity(id={self.id}, date={self.date}, steps={self.steps}, walk_yes_no={self.walk_yes_no})>"
+        return f"<DailyActivity(id={self.id}, date={self.date}, steps={self.steps}, walk_yes_no={self.walk_yes_no}, mobility_yes_no={self.mobility_yes_no})>"
 
 
 class Workout(Base):

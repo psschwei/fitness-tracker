@@ -130,6 +130,7 @@ export interface DailyActivity {
   date: string;
   steps?: number;
   walk_yes_no?: boolean;
+  mobility_yes_no?: boolean;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -139,11 +140,13 @@ export interface DailyActivityCreate {
   date?: string;
   steps?: number;
   walk_yes_no?: boolean;
+  mobility_yes_no?: boolean;
   notes?: string;
 }
 
 export interface DailyActivityUpdate {
   steps?: number;
   walk_yes_no?: boolean;
+  mobility_yes_no?: boolean;
   notes?: string;
 } 

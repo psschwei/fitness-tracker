@@ -13,10 +13,12 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
 }) => {
   const [steps, setSteps] = useState<number | undefined>(undefined);
   const [walkYesNo, setWalkYesNo] = useState<boolean | undefined>(undefined);
+  const [mobilityYesNo, setMobilityYesNo] = useState<boolean | undefined>(undefined);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [savingSteps, setSavingSteps] = useState(false);
   const [savingWalk, setSavingWalk] = useState(false);
+  const [savingMobility, setSavingMobility] = useState(false);
   const [savingAll, setSavingAll] = useState(false);
   const [currentActivity, setCurrentActivity] = useState<DailyActivity | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -32,11 +34,13 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
         setCurrentActivity(activity);
         setSteps(activity.steps || undefined);
         setWalkYesNo(activity.walk_yes_no !== undefined ? activity.walk_yes_no : undefined);
+        setMobilityYesNo(activity.mobility_yes_no !== undefined ? activity.mobility_yes_no : undefined);
         setNotes(activity.notes || '');
       } else {
         setCurrentActivity(null);
         setSteps(undefined);
         setWalkYesNo(undefined);
+        setMobilityYesNo(undefined);
         setNotes('');
       }
       setHasUnsavedChanges(false);
@@ -49,9 +53,10 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
     const hasChanges = 
       (steps !== undefined && steps !== (currentActivity?.steps || undefined)) ||
       (walkYesNo !== undefined && walkYesNo !== (currentActivity?.walk_yes_no ?? undefined)) ||
+      (mobilityYesNo !== undefined && mobilityYesNo !== (currentActivity?.mobility_yes_no ?? undefined)) ||
       (notes !== (currentActivity?.notes || ''));
     setHasUnsavedChanges(hasChanges);
-  }, [steps, walkYesNo, notes, currentActivity]);
+  }, [steps, walkYesNo, mobilityYesNo, notes, currentActivity]);
 
   const saveSteps = async () => {
     if (steps === undefined) return;
@@ -62,6 +67,7 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
         date,
         steps,
         walk_yes_no: walkYesNo,
+        mobility_yes_no: mobilityYesNo,
         notes: notes || undefined
       };
       
@@ -84,6 +90,7 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
         date,
         steps,
         walk_yes_no: walkYesNo,
+        mobility_yes_no: mobilityYesNo,
         notes: notes || undefined
       };
       
@@ -97,6 +104,29 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
     }
   };
 
+  const saveMobility = async () => {
+    if (mobilityYesNo === undefined) return;
+    
+    setSavingMobility(true);
+    try {
+      const activityData: DailyActivityCreate = {
+        date,
+        steps,
+        walk_yes_no: walkYesNo,
+        mobility_yes_no: mobilityYesNo,
+        notes: notes || undefined
+      };
+      
+      const updatedActivity = await createOrUpdateDailyActivity(activityData);
+      setCurrentActivity(updatedActivity);
+      onActivityUpdated?.(updatedActivity);
+    } catch (error) {
+      console.error('Error saving mobility status:', error);
+    } finally {
+      setSavingMobility(false);
+    }
+  };
+
   const saveAllChanges = async () => {
     setSavingAll(true);
     try {
@@ -104,6 +134,7 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
         date,
         steps,
         walk_yes_no: walkYesNo,
+        mobility_yes_no: mobilityYesNo,
         notes: notes || undefined
       };
       
@@ -143,6 +174,31 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {savingSteps ? 'Saving...' : 'Save Steps'}
+          </button>
+        </div>
+
+        {/* Mobility Section */}
+        <div className="flex items-center space-x-4">
+          <label className="flex-1">
+            <span className="block text-sm font-medium text-gray-700 mb-1">
+              Did a Mobility Session Today?
+            </span>
+            <select
+              value={mobilityYesNo === undefined ? '' : mobilityYesNo.toString()}
+              onChange={(e) => setMobilityYesNo(e.target.value === '' ? undefined : e.target.value === 'true')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select...</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </label>
+          <button
+            onClick={saveMobility}
+            disabled={savingMobility || mobilityYesNo === undefined}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {savingMobility ? 'Saving...' : 'Save Mobility'}
           </button>
         </div>
 
@@ -211,6 +267,11 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
               {currentActivity.walk_yes_no !== undefined && (
                 <span className={currentActivity.walk_yes_no ? ' text-green-600' : ' text-red-600'}>
                   {currentActivity.walk_yes_no ? ' ✓ Walk taken' : ' ✗ No walk'}
+                </span>
+              )}
+              {currentActivity.mobility_yes_no !== undefined && (
+                <span className={currentActivity.mobility_yes_no ? ' text-green-600' : ' text-red-600'}>
+                  {currentActivity.mobility_yes_no ? ' ✓ Mobility activity' : ' ✗ No mobility activity'}
                 </span>
               )}
               {currentActivity.notes && (
