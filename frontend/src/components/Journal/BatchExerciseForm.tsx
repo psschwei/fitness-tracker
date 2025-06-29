@@ -10,6 +10,7 @@ interface ExerciseEntry {
   exercise_name?: string // For new exercises
   weight: number
   reps_per_set: number
+  sets: number // Number of sets to perform
   display_weight: number
   notes: string
   isSaved: boolean // Track if this exercise has been saved
@@ -30,6 +31,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       exercise_id: 0, 
       weight: 0, 
       reps_per_set: 0, 
+      sets: 1,
       display_weight: 0, 
       notes: '',
       isSaved: false
@@ -70,6 +72,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       exercise_id: 0, 
       weight: 0, 
       reps_per_set: 0, 
+      sets: 1,
       display_weight: 0, 
       notes: '',
       isSaved: false
@@ -104,7 +107,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   const saveIndividualExercise = async (index: number) => {
     const entry = exerciseEntries[index]
     
-    if (!entry.exercise_id || entry.weight <= 0 || entry.reps_per_set <= 0) {
+    if ((!entry.exercise_id && !entry.exercise_name) || entry.weight <= 0 || entry.reps_per_set <= 0 || entry.sets <= 0) {
       setError('Please fill in all fields with valid values')
       return
     }
@@ -119,7 +122,8 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       if (entry.exercise_name && !exercises.find(e => e.id === exerciseId)) {
         // Create new exercise
         const newExercise = await exerciseApi.create({
-          name: entry.exercise_name
+          name: entry.exercise_name,
+          category: 'strength' // Default category for new exercises
         })
         exerciseId = newExercise.id
         // Reload exercises to include the new one
@@ -132,8 +136,11 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
         notes: workoutNotes || undefined,
         exercises: [{
           exercise_id: exerciseId,
-          weight: entry.weight,
-          reps_per_set: entry.reps_per_set,
+          sets_data: [{
+            weight: entry.weight,
+            reps: entry.reps_per_set,
+            sets: entry.sets
+          }],
           notes: entry.notes
         }],
       }
@@ -168,7 +175,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
   const saveAllExercises = async () => {
     const validEntries = exerciseEntries.filter(
-      entry => entry.exercise_id > 0 && entry.weight > 0 && entry.reps_per_set > 0
+      entry => (entry.exercise_id > 0 || entry.exercise_name) && entry.weight > 0 && entry.reps_per_set > 0 && entry.sets > 0
     )
 
     if (validEntries.length === 0) {
@@ -194,15 +201,19 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
         let exerciseId = entry.exercise_id
         if (entry.exercise_name && !exercises.find(e => e.id === exerciseId)) {
           const newExercise = await exerciseApi.create({
-            name: entry.exercise_name
+            name: entry.exercise_name,
+            category: 'strength' // Default category for new exercises
           })
           exerciseId = newExercise.id
         }
 
         exercisesToSave.push({
           exercise_id: exerciseId,
-          weight: entry.weight,
-          reps_per_set: entry.reps_per_set,
+          sets_data: [{
+            weight: entry.weight,
+            reps: entry.reps_per_set,
+            sets: entry.sets
+          }],
           notes: entry.notes
         })
       }
@@ -299,7 +310,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Exercise
@@ -339,6 +350,21 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
                   min="1"
                   value={entry.reps_per_set || ''}
                   onChange={(e) => updateExerciseEntry(index, 'reps_per_set', parseInt(e.target.value) || 0)}
+                  className="input"
+                  placeholder="0"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sets
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={entry.sets || ''}
+                  onChange={(e) => updateExerciseEntry(index, 'sets', parseInt(e.target.value) || 0)}
                   className="input"
                   placeholder="0"
                   required

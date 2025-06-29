@@ -97,12 +97,10 @@ def get_daily_activity(activity_id: int, db: Session = Depends(get_db)):
     return activity
 
 
-@router.get("/daily-activities/date/{target_date}", response_model=DailyActivityResponse)
+@router.get("/daily-activities/date/{target_date}", response_model=Optional[DailyActivityResponse])
 def get_daily_activity_by_date(target_date: date, db: Session = Depends(get_db)):
     """Get daily activity for a specific date."""
     activity = DailyActivityService.get_daily_activity_by_date(db, target_date)
-    if activity is None:
-        raise HTTPException(status_code=404, detail="Daily activity not found for this date")
     return activity
 
 
@@ -193,6 +191,19 @@ async def delete_workout(
     if not success:
         raise HTTPException(status_code=404, detail="Workout not found")
     return {"message": "Workout deleted successfully"}
+
+
+@router.delete("/workout-exercises/{exercise_id}")
+async def delete_workout_exercise(
+    exercise_id: int,
+    db: Session = Depends(get_db)
+):
+    """Delete an individual exercise from a workout."""
+    service = ExerciseService(db)
+    success = service.delete_workout_exercise(exercise_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Workout exercise not found")
+    return {"message": "Exercise deleted from workout successfully"}
 
 
 # Progress tracking endpoints

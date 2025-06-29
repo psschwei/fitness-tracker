@@ -129,6 +129,11 @@ export const workoutApi = {
     apiRequest(`/exercise/workouts/${id}`, {
       method: 'DELETE',
     }),
+
+  deleteExercise: (exerciseId: number): Promise<void> =>
+    apiRequest(`/exercise/workout-exercises/${exerciseId}`, {
+      method: 'DELETE',
+    }),
 }
 
 // Journal API

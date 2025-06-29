@@ -67,6 +67,7 @@ class SetData(BaseModel):
     """Schema for a single set in a workout."""
     weight: float = Field(..., ge=0, description="Weight in pounds")
     reps: int = Field(..., ge=1, description="Number of repetitions")
+    sets: int = Field(..., ge=1, description="Number of sets")
 
 
 class WorkoutExerciseBase(BaseModel):

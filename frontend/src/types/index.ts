@@ -47,6 +47,14 @@ export interface Exercise {
 
 export interface ExerciseCreate {
   name: string
+  category: string
+}
+
+// Set Types
+export interface SetData {
+  weight: number
+  reps: number
+  sets: number
 }
 
 // Workout Types
@@ -70,8 +78,7 @@ export interface WorkoutExercise {
   workout_id: number
   exercise_id: number
   exercise_name: string
-  weight: number
-  reps_per_set: number
+  sets_data: SetData[]
   notes?: string | null
   created_at: string
   updated_at: string
@@ -79,8 +86,7 @@ export interface WorkoutExercise {
 
 export interface WorkoutExerciseCreate {
   exercise_id: number
-  weight: number
-  reps_per_set: number
+  sets_data: SetData[]
   notes?: string | null
 }
 

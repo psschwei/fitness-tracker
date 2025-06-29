@@ -40,6 +40,18 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
     }
   }
 
+  const handleDeleteExercise = async (exerciseId: number) => {
+    if (confirm('Are you sure you want to delete this exercise from the workout?')) {
+      try {
+        await workoutApi.deleteExercise(exerciseId)
+        onUpdate()
+      } catch (err) {
+        console.error('Error deleting exercise:', err)
+        alert('Failed to delete exercise')
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Body Composition Section */}
@@ -151,16 +163,24 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                     <div key={exercise.id} className="flex items-center justify-between bg-white rounded p-3">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">{exercise.exercise_name}</h3>
-                        <p className="text-sm text-gray-500">
-                          {formatWeight(convertWeight(exercise.weight, 'lbs', units.exerciseWeight), units.exerciseWeight)} × {exercise.reps_per_set} reps
-                        </p>
+                        <div className="text-sm text-gray-500">
+                          {exercise.sets_data.map((set, index) => (
+                            <div key={index}>
+                              {formatWeight(convertWeight(set.weight, 'lbs', units.exerciseWeight), units.exerciseWeight)} × {set.reps} reps × {set.sets} sets
+                            </div>
+                          ))}
+                        </div>
                         {exercise.notes && (
                           <p className="text-sm text-gray-600 mt-1 italic">
                             "{exercise.notes}"
                           </p>
                         )}
                       </div>
-                      <button className="text-red-500 hover:text-red-700 text-sm ml-4">
+                      <button
+                        onClick={() => handleDeleteExercise(exercise.id)}
+                        className="text-red-500 hover:text-red-700 text-sm ml-4"
+                        title="Delete exercise"
+                      >
                         Remove
                       </button>
                     </div>

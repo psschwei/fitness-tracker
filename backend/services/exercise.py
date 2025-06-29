@@ -88,16 +88,8 @@ class ExerciseService:
         
         # Add exercises to the workout
         for exercise_data in workout_data.exercises:
-            # Handle both old format (sets_data) and new format (weight, reps_per_set)
-            if hasattr(exercise_data, 'sets_data') and exercise_data.sets_data:
-                # Old format with sets_data
-                sets_data = [set_data.dict() for set_data in exercise_data.sets_data]
-            else:
-                # New format with weight and reps_per_set
-                sets_data = [{
-                    'weight': exercise_data.weight,
-                    'reps': exercise_data.reps_per_set
-                }]
+            # Convert sets_data to the format expected by the database
+            sets_data = [set_data.dict() for set_data in exercise_data.sets_data]
             
             workout_exercise = WorkoutExercise(
                 workout_id=db_workout.id,
@@ -147,6 +139,16 @@ class ExerciseService:
             return False
         
         self.db.delete(workout)
+        self.db.commit()
+        return True
+    
+    def delete_workout_exercise(self, exercise_id: int) -> bool:
+        """Delete an individual exercise from a workout."""
+        workout_exercise = self.db.query(WorkoutExercise).filter(WorkoutExercise.id == exercise_id).first()
+        if not workout_exercise:
+            return False
+        
+        self.db.delete(workout_exercise)
         self.db.commit()
         return True
     

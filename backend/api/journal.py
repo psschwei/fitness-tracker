@@ -18,8 +18,7 @@ class WorkoutExercise(BaseModel):
     workout_id: int
     exercise_id: int
     exercise_name: str
-    weight: float
-    reps_per_set: int
+    sets_data: List[dict]  # List of sets with weight and reps
     notes: Optional[str] = None
     created_at: str
     updated_at: str
@@ -66,22 +65,12 @@ async def get_daily_entry(
     for workout in workouts:
         exercises = []
         for exercise in workout.exercises:
-            # Extract weight and reps from sets_data
-            weight = 0
-            reps_per_set = 0
-            if exercise.sets_data and len(exercise.sets_data) > 0:
-                # Use the first set's data
-                first_set = exercise.sets_data[0]
-                weight = first_set.get('weight', 0)
-                reps_per_set = first_set.get('reps', 0)
-            
             exercises.append(WorkoutExercise(
                 id=exercise.id,
                 workout_id=workout.id,
                 exercise_id=exercise.exercise_id,
                 exercise_name=exercise.exercise.name,
-                weight=weight,
-                reps_per_set=reps_per_set,
+                sets_data=exercise.sets_data,
                 notes=exercise.notes,
                 created_at=exercise.created_at.isoformat(),
                 updated_at=exercise.updated_at.isoformat()
@@ -150,22 +139,12 @@ async def get_daily_entries(
         for workout in workouts:
             exercises = []
             for exercise in workout.exercises:
-                # Extract weight and reps from sets_data
-                weight = 0
-                reps_per_set = 0
-                if exercise.sets_data and len(exercise.sets_data) > 0:
-                    # Use the first set's data
-                    first_set = exercise.sets_data[0]
-                    weight = first_set.get('weight', 0)
-                    reps_per_set = first_set.get('reps', 0)
-                
                 exercises.append(WorkoutExercise(
                     id=exercise.id,
                     workout_id=workout.id,
                     exercise_id=exercise.exercise_id,
                     exercise_name=exercise.exercise.name,
-                    weight=weight,
-                    reps_per_set=reps_per_set,
+                    sets_data=exercise.sets_data,
                     notes=exercise.notes,
                     created_at=exercise.created_at.isoformat(),
                     updated_at=exercise.updated_at.isoformat()
