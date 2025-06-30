@@ -113,9 +113,11 @@ class ExerciseService:
     
     def get_workouts_by_date(self, target_date: date) -> List[Workout]:
         """Get workouts for a specific date."""
+        next_day = target_date + timedelta(days=1)
         return self.db.query(Workout).filter(
-            func.date(Workout.date) == target_date
-        ).order_by(Workout.date).all()
+            Workout.date >= target_date,
+            Workout.date < next_day
+        ).all()
     
     def update_workout(self, workout_id: int, update_data: WorkoutUpdate) -> Optional[Workout]:
         """Update a workout."""
@@ -268,9 +270,10 @@ class DailyActivityService:
     @staticmethod
     def get_daily_activity_by_date(db: Session, target_date: date) -> Optional[DailyActivity]:
         """Get daily activity for a specific date."""
+        next_day = target_date + timedelta(days=1)
         return db.query(DailyActivity).filter(
             DailyActivity.date >= target_date,
-            DailyActivity.date < target_date.replace(day=target_date.day + 1)
+            DailyActivity.date < next_day
         ).first()
     
     @staticmethod
@@ -341,9 +344,10 @@ class WorkoutService:
     @staticmethod
     def get_workouts_by_date(db: Session, target_date: date) -> List[Workout]:
         """Get workouts for a specific date."""
+        next_day = target_date + timedelta(days=1)
         return db.query(Workout).filter(
             Workout.date >= target_date,
-            Workout.date < target_date.replace(day=target_date.day + 1)
+            Workout.date < next_day
         ).all()
     
     @staticmethod
