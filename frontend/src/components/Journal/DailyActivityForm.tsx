@@ -12,8 +12,8 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
   onActivityUpdated 
 }) => {
   const [steps, setSteps] = useState<number | undefined>(undefined);
-  const [walkYesNo, setWalkYesNo] = useState<boolean | undefined>(undefined);
-  const [mobilityYesNo, setMobilityYesNo] = useState<boolean | undefined>(undefined);
+  const [walkYesNo, setWalkYesNo] = useState<boolean | null | undefined>(undefined);
+  const [mobilityYesNo, setMobilityYesNo] = useState<boolean | null | undefined>(undefined);
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [savingSteps, setSavingSteps] = useState(false);
@@ -33,8 +33,8 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
       if (activity) {
         setCurrentActivity(activity);
         setSteps(activity.steps || undefined);
-        setWalkYesNo(activity.walk_yes_no !== undefined ? activity.walk_yes_no : undefined);
-        setMobilityYesNo(activity.mobility_yes_no !== undefined ? activity.mobility_yes_no : undefined);
+        setWalkYesNo(activity.walk_yes_no !== undefined && activity.walk_yes_no !== null ? activity.walk_yes_no : undefined);
+        setMobilityYesNo(activity.mobility_yes_no !== undefined && activity.mobility_yes_no !== null ? activity.mobility_yes_no : undefined);
         setNotes(activity.notes || '');
       } else {
         setCurrentActivity(null);
@@ -184,7 +184,7 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
               Did a Mobility Session Today?
             </span>
             <select
-              value={mobilityYesNo === undefined ? '' : mobilityYesNo.toString()}
+              value={mobilityYesNo === undefined || mobilityYesNo === null ? '' : mobilityYesNo.toString()}
               onChange={(e) => setMobilityYesNo(e.target.value === '' ? undefined : e.target.value === 'true')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -209,7 +209,7 @@ export const DailyActivityForm: React.FC<DailyActivityFormProps> = ({
               Took a Walk Today?
             </span>
             <select
-              value={walkYesNo === undefined ? '' : walkYesNo.toString()}
+              value={walkYesNo === undefined || walkYesNo === null ? '' : walkYesNo.toString()}
               onChange={(e) => setWalkYesNo(e.target.value === '' ? undefined : e.target.value === 'true')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >

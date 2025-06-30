@@ -1,13 +1,13 @@
 // Unit conversion utilities
 
+// Fixed units - no switching needed
 export type WeightUnit = 'lbs' | 'kg'
 export type LengthUnit = 'inches' | 'cm'
 
-export interface UnitPreferences {
-  bodyWeight: WeightUnit
-  exerciseWeight: WeightUnit
-  length: LengthUnit
-}
+// Standard units for the app
+export const EXERCISE_WEIGHT_UNIT: WeightUnit = 'kg'
+export const BODY_WEIGHT_UNIT: WeightUnit = 'lbs'
+export const LENGTH_UNIT: LengthUnit = 'inches'
 
 // Conversion factors
 const LBS_TO_KG = 0.453592

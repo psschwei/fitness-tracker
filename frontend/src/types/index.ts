@@ -129,8 +129,8 @@ export interface DailyActivity {
   id: number;
   date: string;
   steps?: number;
-  walk_yes_no?: boolean;
-  mobility_yes_no?: boolean;
+  walk_yes_no?: boolean | null;
+  mobility_yes_no?: boolean | null;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -139,8 +139,8 @@ export interface DailyActivity {
 export interface DailyActivityCreate {
   date?: string;
   steps?: number;
-  walk_yes_no?: boolean;
-  mobility_yes_no?: boolean;
+  walk_yes_no?: boolean | null;
+  mobility_yes_no?: boolean | null;
   notes?: string;
 }
 

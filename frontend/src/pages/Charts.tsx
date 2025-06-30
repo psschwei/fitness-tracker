@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { WeightTrend, BodyCompositionTrend } from '../types'
 import { analyticsApi } from '../api/client'
+import { useUnits } from '../contexts/UnitContext'
+import { convertWeight, convertLength, formatWeight, formatLength } from '../utils/units'
 
 function Charts() {
+  const { units } = useUnits()
   const [weightTrend, setWeightTrend] = useState<WeightTrend[]>([])
   const [bodyCompositionTrend, setBodyCompositionTrend] = useState<BodyCompositionTrend[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,7 +99,7 @@ function Charts() {
                     Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Weight (lbs)
+                    Weight ({units.bodyWeight})
                   </th>
                 </tr>
               </thead>
@@ -107,7 +110,7 @@ function Charts() {
                       {entry.date}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {entry.weight}
+                      {formatWeight(convertWeight(entry.weight, 'lbs', units.bodyWeight), units.bodyWeight)}
                     </td>
                   </tr>
                 ))}
@@ -140,10 +143,10 @@ function Charts() {
                       {entry.date}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {entry.weight} lbs
+                      {formatWeight(convertWeight(entry.weight, 'lbs', units.bodyWeight), units.bodyWeight)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {entry.waist_circumference} in
+                      {formatLength(convertLength(entry.waist_circumference, 'inches', units.length), units.length)}
                     </td>
                   </tr>
                 ))}

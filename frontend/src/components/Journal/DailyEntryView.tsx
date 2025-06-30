@@ -2,8 +2,7 @@ import { DailyEntry } from '../../types'
 import { bodyCompositionApi, workoutApi } from '../../api/client'
 import BodyCompositionForm from './BodyCompositionForm'
 import BatchExerciseForm from './BatchExerciseForm'
-import { useUnits } from '../../contexts/UnitContext'
-import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI, formatBodyFat } from '../../utils/units'
+import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI, formatBodyFat, BODY_WEIGHT_UNIT, EXERCISE_WEIGHT_UNIT, LENGTH_UNIT } from '../../utils/units'
 
 interface DailyEntryViewProps {
   entry: DailyEntry
@@ -11,7 +10,6 @@ interface DailyEntryViewProps {
 }
 
 function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
-  const { units } = useUnits()
   const workouts = entry.workouts ?? []
 
   const handleDeleteBodyComposition = async () => {
@@ -65,14 +63,14 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                 <div>
                   <span className="text-sm font-medium text-gray-500">Weight</span>
                   <p className="text-lg font-semibold text-gray-900">
-                    {formatWeight(convertWeight(entry.body_composition.weight_pounds, 'lbs', units.bodyWeight), units.bodyWeight)}
+                    {formatWeight(convertWeight(entry.body_composition.weight_pounds, 'lbs', BODY_WEIGHT_UNIT), BODY_WEIGHT_UNIT)}
                   </p>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-500">Height</span>
                   <p className="text-lg font-semibold text-gray-900">
                     {entry.body_composition.height_inches ? 
-                      formatLength(convertLength(entry.body_composition.height_inches, 'inches', units.length), units.length) :
+                      formatLength(convertLength(entry.body_composition.height_inches, 'inches', LENGTH_UNIT), LENGTH_UNIT) :
                       'Not recorded'
                     }
                   </p>
@@ -81,7 +79,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                   <span className="text-sm font-medium text-gray-500">Waist Circumference</span>
                   <p className="text-lg font-semibold text-gray-900">
                     {entry.body_composition.waist_inches ? 
-                      formatLength(convertLength(entry.body_composition.waist_inches, 'inches', units.length), units.length) :
+                      formatLength(convertLength(entry.body_composition.waist_inches, 'inches', LENGTH_UNIT), LENGTH_UNIT) :
                       'Not recorded'
                     }
                   </p>
@@ -90,7 +88,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                   <span className="text-sm font-medium text-gray-500">Neck Circumference</span>
                   <p className="text-lg font-semibold text-gray-900">
                     {entry.body_composition.neck_inches ? 
-                      formatLength(convertLength(entry.body_composition.neck_inches, 'inches', units.length), units.length) :
+                      formatLength(convertLength(entry.body_composition.neck_inches, 'inches', LENGTH_UNIT), LENGTH_UNIT) :
                       'Not recorded'
                     }
                   </p>
@@ -166,7 +164,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                         <div className="text-sm text-gray-500">
                           {exercise.sets_data.map((set, index) => (
                             <div key={index}>
-                              {formatWeight(convertWeight(set.weight, 'lbs', units.exerciseWeight), units.exerciseWeight)} × {set.reps} reps × {set.sets} sets
+                              {set.weight === 0 ? 'Bodyweight' : formatWeight(convertWeight(set.weight, 'lbs', EXERCISE_WEIGHT_UNIT), EXERCISE_WEIGHT_UNIT)} × {set.reps} reps × {set.sets} sets
                             </div>
                           ))}
                         </div>

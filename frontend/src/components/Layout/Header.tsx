@@ -1,9 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useUnits } from '../../contexts/UnitContext'
 
 function Header() {
   const location = useLocation()
-  const { units, toggleBodyWeightUnit, toggleExerciseWeightUnit, toggleLengthUnit } = useUnits()
 
   const navItems = [
     { path: '/', label: 'Journal' },
@@ -21,31 +19,6 @@ function Header() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* Unit toggles */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={toggleBodyWeightUnit}
-                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
-                title="Toggle body weight units"
-              >
-                Body: {units.bodyWeight}
-              </button>
-              <button
-                onClick={toggleExerciseWeightUnit}
-                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
-                title="Toggle exercise weight units"
-              >
-                Exercise: {units.exerciseWeight}
-              </button>
-              <button
-                onClick={toggleLengthUnit}
-                className="px-2 py-1 text-xs font-medium rounded border transition-colors duration-200 hover:bg-gray-50"
-                title="Toggle length units"
-              >
-                {units.length === 'inches' ? 'in' : 'cm'}
-              </button>
-            </div>
-            
             <nav className="flex space-x-8">
               {navItems.map((item) => (
                 <Link

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Exercise, WorkoutCreate, WorkoutExerciseCreate } from '../../types'
 import { exerciseApi, workoutApi } from '../../api/client'
-import { useUnits } from '../../contexts/UnitContext'
-import { convertWeight, getWeightUnitSymbol } from '../../utils/units'
+import { convertWeight, getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
 
 interface ExerciseEntry {
   id?: string // Local ID for tracking saved state
@@ -23,7 +22,6 @@ interface BatchExerciseFormProps {
 }
 
 function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
-  const { units } = useUnits()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>([
     { 
@@ -46,15 +44,15 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
     loadExercises()
   }, [])
 
-  // Convert display weights to backend units when units change
+  // Convert display weights to backend units (kg to lbs)
   useEffect(() => {
     setExerciseEntries(prev => 
       prev.map(entry => ({
         ...entry,
-        weight: convertWeight(entry.display_weight, units.exerciseWeight, 'lbs')
+        weight: convertWeight(entry.display_weight, EXERCISE_WEIGHT_UNIT, 'lbs')
       }))
     )
-  }, [units.exerciseWeight])
+  }, [])
 
   const loadExercises = async () => {
     try {
@@ -90,7 +88,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
           const updated = { ...entry, [field]: value }
           // If updating display_weight, also update the backend weight
           if (field === 'display_weight') {
-            updated.weight = convertWeight(value as number, units.exerciseWeight, 'lbs')
+            updated.weight = convertWeight(value as number, EXERCISE_WEIGHT_UNIT, 'lbs')
           }
           // If updating exercise_id, mark as not saved since it changed
           if (field === 'exercise_id') {
@@ -107,7 +105,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
   const saveIndividualExercise = async (index: number) => {
     const entry = exerciseEntries[index]
     
-    if ((!entry.exercise_id && !entry.exercise_name) || entry.weight <= 0 || entry.reps_per_set <= 0 || entry.sets <= 0) {
+    if ((!entry.exercise_id && !entry.exercise_name) || entry.weight < 0 || entry.reps_per_set <= 0 || entry.sets <= 0) {
       setError('Please fill in all fields with valid values')
       return
     }
@@ -175,7 +173,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
   const saveAllExercises = async () => {
     const validEntries = exerciseEntries.filter(
-      entry => (entry.exercise_id > 0 || entry.exercise_name) && entry.weight > 0 && entry.reps_per_set > 0 && entry.sets > 0
+      entry => (entry.exercise_id > 0 || entry.exercise_name) && entry.weight >= 0 && entry.reps_per_set > 0 && entry.sets > 0
     )
 
     if (validEntries.length === 0) {
@@ -327,7 +325,7 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight ({getWeightUnitSymbol(units.exerciseWeight)})
+                  Weight ({getWeightUnitSymbol(EXERCISE_WEIGHT_UNIT)})
                 </label>
                 <input
                   type="number"
