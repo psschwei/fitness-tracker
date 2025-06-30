@@ -53,6 +53,7 @@ class Workout(Base):
     id = Column(Integer, primary_key=True, index=True)
     date = Column(DateTime, nullable=False, default=func.now())
     notes = Column(Text)
+    status = Column(String(20), default="in_progress")  # in_progress, completed, cancelled
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
@@ -60,7 +61,7 @@ class Workout(Base):
     exercises = relationship("WorkoutExercise", back_populates="workout", cascade="all, delete-orphan")
     
     def __repr__(self):
-        return f"<Workout(id={self.id}, date={self.date})>"
+        return f"<Workout(id={self.id}, date={self.date}, status={self.status})>"
 
 
 class WorkoutExercise(Base):

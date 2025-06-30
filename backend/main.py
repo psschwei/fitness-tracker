@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 import uvicorn
 
 from backend.database import get_db, init_db
+from backend.migrate import run_migrations
 from backend.api import body_composition, exercise, journal
 from backend.services.body_composition import BodyCompositionService
 from backend.services.exercise import ExerciseService
@@ -36,6 +37,7 @@ app.include_router(journal.router, prefix="/api/journal", tags=["journal"])
 async def startup_event():
     """Initialize database on startup."""
     init_db()
+    run_migrations()
 
 
 @app.get("/")

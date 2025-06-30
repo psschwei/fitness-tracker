@@ -6,6 +6,10 @@ import {
   ExerciseCreate,
   Workout,
   WorkoutCreate,
+  WorkoutUpdate,
+  WorkoutExercise,
+  WorkoutExerciseCreate,
+  WorkoutExerciseUpdate,
   DailyEntry,
   WeightTrend,
   BodyCompositionTrend,
@@ -119,7 +123,7 @@ export const workoutApi = {
   getByDate: (date: string): Promise<Workout[]> =>
     apiRequest(`/exercise/workouts/date/${date}`),
 
-  update: (id: number, data: WorkoutCreate): Promise<Workout> =>
+  update: (id: number, data: WorkoutUpdate): Promise<Workout> =>
     apiRequest(`/exercise/workouts/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -133,6 +137,23 @@ export const workoutApi = {
   deleteExercise: (exerciseId: number): Promise<void> =>
     apiRequest(`/exercise/workout-exercises/${exerciseId}`, {
       method: 'DELETE',
+    }),
+
+  addExercise: (workoutId: number, exercise: WorkoutExerciseCreate): Promise<WorkoutExercise> =>
+    apiRequest(`/exercise/workouts/${workoutId}/exercises`, {
+      method: 'POST',
+      body: JSON.stringify(exercise),
+    }),
+
+  updateExercise: (exerciseId: number, exercise: WorkoutExerciseUpdate): Promise<WorkoutExercise> =>
+    apiRequest(`/exercise/workout-exercises/${exerciseId}`, {
+      method: 'PUT',
+      body: JSON.stringify(exercise),
+    }),
+
+  completeWorkout: (workoutId: number): Promise<void> =>
+    apiRequest(`/exercise/workouts/${workoutId}/complete`, {
+      method: 'POST',
     }),
 }
 

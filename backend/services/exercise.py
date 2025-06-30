@@ -8,7 +8,7 @@ import pandas as pd
 
 from backend.models.exercise import Exercise, Workout, WorkoutExercise, DailyActivity
 from backend.schemas.exercise import (
-    ExerciseCreate, ExerciseUpdate, WorkoutCreate, WorkoutUpdate,
+    ExerciseCreate, ExerciseUpdate, WorkoutCreate, WorkoutUpdate, WorkoutExerciseUpdate, WorkoutExerciseCreate,
     DailyActivityCreate, DailyActivityUpdate
 )
 
@@ -153,6 +153,59 @@ class ExerciseService:
         self.db.delete(workout_exercise)
         self.db.commit()
         return True
+    
+    def add_exercise_to_workout(self, workout_id: int, exercise_data: WorkoutExerciseCreate) -> Optional[WorkoutExercise]:
+        """Add an exercise to an existing workout."""
+        workout = self.get_workout(workout_id)
+        if not workout:
+            return None
+        
+        # Convert sets_data to the format expected by the database
+        sets_data = [set_data.dict() for set_data in exercise_data.sets_data]
+        
+        workout_exercise = WorkoutExercise(
+            workout_id=workout_id,
+            exercise_id=exercise_data.exercise_id,
+            sets_data=sets_data,
+            notes=exercise_data.notes
+        )
+        
+        self.db.add(workout_exercise)
+        self.db.commit()
+        self.db.refresh(workout_exercise)
+        return workout_exercise
+    
+    def update_workout_exercise(self, exercise_id: int, exercise_data: WorkoutExerciseUpdate) -> Optional[WorkoutExercise]:
+        """Update an individual exercise within a workout."""
+        workout_exercise = self.db.query(WorkoutExercise).filter(WorkoutExercise.id == exercise_id).first()
+        if not workout_exercise:
+            return None
+        
+        update_dict = exercise_data.dict(exclude_unset=True)
+        for field, value in update_dict.items():
+            if field == 'sets_data':
+                # Convert sets_data to the format expected by the database
+                sets_data = [set_data.dict() for set_data in value]
+                setattr(workout_exercise, field, sets_data)
+            else:
+                setattr(workout_exercise, field, value)
+        
+        workout_exercise.updated_at = datetime.now()
+        self.db.commit()
+        self.db.refresh(workout_exercise)
+        return workout_exercise
+    
+    def complete_workout(self, workout_id: int) -> Optional[Workout]:
+        """Mark a workout as completed."""
+        workout = self.get_workout(workout_id)
+        if not workout:
+            return None
+        
+        workout.status = "completed"
+        workout.updated_at = datetime.now()
+        self.db.commit()
+        self.db.refresh(workout)
+        return workout
     
     # Progress tracking
     def get_exercise_progress(self, exercise_id: int, days: int = 30) -> Dict[str, Any]:

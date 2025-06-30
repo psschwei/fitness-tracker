@@ -62,6 +62,7 @@ export interface Workout {
   id: number
   date: string
   notes?: string | null
+  status: string // in_progress, completed, cancelled
   created_at: string
   updated_at: string
   exercises: WorkoutExercise[]
@@ -71,6 +72,10 @@ export interface WorkoutCreate {
   date: string
   notes?: string | null
   exercises: WorkoutExerciseCreate[]
+}
+
+export interface WorkoutUpdate {
+  notes?: string | null
 }
 
 export interface WorkoutExercise {
@@ -87,6 +92,12 @@ export interface WorkoutExercise {
 export interface WorkoutExerciseCreate {
   exercise_id: number
   sets_data: SetData[]
+  notes?: string | null
+}
+
+export interface WorkoutExerciseUpdate {
+  exercise_id?: number
+  sets_data?: SetData[]
   notes?: string | null
 }
 

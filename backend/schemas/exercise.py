@@ -79,6 +79,11 @@ class WorkoutExerciseBase(BaseModel):
     notes: Optional[str] = Field(None, description="Exercise-specific notes")
 
 
+class WorkoutExerciseCreate(WorkoutExerciseBase):
+    """Schema for creating a workout exercise (alias for WorkoutExerciseBase)."""
+    pass
+
+
 class WorkoutBase(BaseModel):
     """Base workout schema."""
     notes: Optional[str] = Field(None, description="Workout notes")
@@ -87,12 +92,20 @@ class WorkoutBase(BaseModel):
 class WorkoutCreate(WorkoutBase):
     """Schema for creating a new workout."""
     date: Optional[datetime] = Field(None, description="Workout date (defaults to now)")
-    exercises: List[WorkoutExerciseBase] = Field(..., min_items=1, description="List of exercises")
+    exercises: List[WorkoutExerciseBase] = Field(default=[], description="List of exercises")
 
 
 class WorkoutUpdate(BaseModel):
     """Schema for updating a workout."""
     notes: Optional[str] = Field(None, description="Workout notes")
+    status: Optional[str] = Field(None, description="Workout status (in_progress, completed, cancelled)")
+
+
+class WorkoutExerciseUpdate(BaseModel):
+    """Schema for updating a workout exercise."""
+    exercise_id: Optional[int] = Field(None, description="Exercise ID")
+    sets_data: Optional[List[SetData]] = Field(None, description="List of sets with weight and reps")
+    notes: Optional[str] = Field(None, description="Exercise-specific notes")
 
 
 class WorkoutExerciseResponse(WorkoutExerciseBase):

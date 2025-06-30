@@ -9,7 +9,7 @@ from backend.database import get_db
 from backend.services.exercise import ExerciseService, DailyActivityService
 from backend.schemas.exercise import (
     ExerciseCreate, ExerciseUpdate, ExerciseResponse,
-    WorkoutCreate, WorkoutUpdate, WorkoutResponse,
+    WorkoutCreate, WorkoutUpdate, WorkoutResponse, WorkoutExerciseUpdate, WorkoutExerciseCreate,
     DailyActivityCreate, DailyActivityUpdate, DailyActivityResponse
 )
 
@@ -204,6 +204,47 @@ async def delete_workout_exercise(
     if not success:
         raise HTTPException(status_code=404, detail="Workout exercise not found")
     return {"message": "Exercise deleted from workout successfully"}
+
+
+@router.post("/workouts/{workout_id}/exercises")
+async def add_exercise_to_workout(
+    workout_id: int,
+    exercise_data: WorkoutExerciseCreate,
+    db: Session = Depends(get_db)
+):
+    """Add an exercise to an existing workout."""
+    service = ExerciseService(db)
+    workout_exercise = service.add_exercise_to_workout(workout_id, exercise_data)
+    if not workout_exercise:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    return workout_exercise
+
+
+@router.put("/workout-exercises/{exercise_id}")
+async def update_workout_exercise(
+    exercise_id: int,
+    exercise_data: WorkoutExerciseUpdate,
+    db: Session = Depends(get_db)
+):
+    """Update an exercise within a workout."""
+    service = ExerciseService(db)
+    updated_exercise = service.update_workout_exercise(exercise_id, exercise_data)
+    if not updated_exercise:
+        raise HTTPException(status_code=404, detail="Workout exercise not found")
+    return updated_exercise
+
+
+@router.post("/workouts/{workout_id}/complete")
+async def complete_workout(
+    workout_id: int,
+    db: Session = Depends(get_db)
+):
+    """Mark a workout as completed."""
+    service = ExerciseService(db)
+    workout = service.complete_workout(workout_id)
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    return {"message": "Workout completed successfully"}
 
 
 # Progress tracking endpoints
