@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Workout, WorkoutCreate, WorkoutExerciseCreate, Exercise } from '../../types'
 import { workoutApi, exerciseApi } from '../../api/client'
-import { convertWeight, getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
+import { getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
 
 interface WorkoutBuilderProps {
   date: string
@@ -85,7 +85,7 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
         const exerciseData: WorkoutExerciseCreate = {
           exercise_id: entry.exercise_id,
           sets_data: [{
-            weight: convertWeight(entry.display_weight, EXERCISE_WEIGHT_UNIT, 'lbs'),
+            weight: entry.display_weight,
             reps: entry.reps,
             sets: entry.sets
           }],
@@ -159,6 +159,33 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
     }
   }
 
+  const cancelWorkout = async () => {
+    if (!currentWorkout) {
+      setError('No workout to cancel')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      
+      await workoutApi.delete(currentWorkout.id)
+      setSuccessMessage('Workout cancelled and deleted.')
+      setCurrentWorkout(null)
+      setExerciseEntries([])
+      setWorkoutNotes('')
+      onSuccess()
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000)
+    } catch (err) {
+      setError('Failed to cancel workout')
+      console.error('Error cancelling workout:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const addExerciseEntry = () => {
     setExerciseEntries(prev => [...prev, {
       exercise_id: 0,
@@ -180,9 +207,9 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
       prev.map((entry, i) => {
         if (i === index) {
           const updated = { ...entry, [field]: value }
-          // If updating display_weight, also update the backend weight
+          // If updating display_weight, also update the backend weight (now both in kg)
           if (field === 'display_weight') {
-            updated.weight = convertWeight(value as number, EXERCISE_WEIGHT_UNIT, 'lbs')
+            updated.weight = value as number
           }
           return updated
         }
@@ -246,6 +273,13 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
               Add Exercises to Workout
             </h3>
             <div className="flex space-x-2">
+              <button
+                onClick={cancelWorkout}
+                disabled={loading}
+                className="btn btn-danger text-sm"
+              >
+                {loading ? 'Cancelling...' : 'Cancel Workout'}
+              </button>
               <button
                 onClick={completeWorkout}
                 disabled={loading}

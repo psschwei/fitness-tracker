@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Workout, WorkoutUpdate, WorkoutExercise, Exercise } from '../../types'
 import { workoutApi, exerciseApi } from '../../api/client'
-import { convertWeight, getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
+import { getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
 
 interface WorkoutEditFormProps {
   workout: Workout
@@ -54,7 +54,7 @@ function WorkoutEditForm({ workout, onSuccess, onCancel }: WorkoutEditFormProps)
         sets: set.sets
       })),
       notes: exercise.notes || '',
-      display_weight: convertWeight(exercise.sets_data[0]?.weight || 0, 'lbs', EXERCISE_WEIGHT_UNIT)
+      display_weight: exercise.sets_data[0]?.weight || 0
     }))
     setEditableExercises(editable)
   }
@@ -64,11 +64,11 @@ function WorkoutEditForm({ workout, onSuccess, onCancel }: WorkoutEditFormProps)
       prev.map((exercise, i) => {
         if (i === index) {
           const updated = { ...exercise, [field]: value }
-          // If updating display_weight, also update the backend weight
+          // If updating display_weight, also update the backend weight (now both in kg)
           if (field === 'display_weight') {
             updated.sets_data = updated.sets_data.map(set => ({
               ...set,
-              weight: convertWeight(value as number, EXERCISE_WEIGHT_UNIT, 'lbs')
+              weight: value as number
             }))
           }
           return updated

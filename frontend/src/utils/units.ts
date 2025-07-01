@@ -10,10 +10,10 @@ export const BODY_WEIGHT_UNIT: WeightUnit = 'lbs'
 export const LENGTH_UNIT: LengthUnit = 'inches'
 
 // Conversion factors
-const LBS_TO_KG = 0.453592
-const KG_TO_LBS = 2.20462
+const LBS_TO_KG = 0.45359237
+const KG_TO_LBS = 2.20462262185
 const INCHES_TO_CM = 2.54
-const CM_TO_INCHES = 0.393701
+const CM_TO_INCHES = 0.3937007874015748
 
 // Weight conversions
 export const convertWeight = (value: number | null | undefined, from: WeightUnit, to: WeightUnit): number => {
@@ -23,13 +23,17 @@ export const convertWeight = (value: number | null | undefined, from: WeightUnit
   
   if (from === to) return value
   
+  let result: number
   if (from === 'lbs' && to === 'kg') {
-    return value * LBS_TO_KG
+    result = value * LBS_TO_KG
   } else if (from === 'kg' && to === 'lbs') {
-    return value * KG_TO_LBS
+    result = value * KG_TO_LBS
+  } else {
+    return value
   }
   
-  return value
+  // Round to 2 decimal places to avoid floating point precision issues
+  return Math.round(result * 100) / 100
 }
 
 // Length conversions

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Exercise, WorkoutCreate, WorkoutExerciseCreate } from '../../types'
 import { exerciseApi, workoutApi } from '../../api/client'
-import { convertWeight, getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
+import { getWeightUnitSymbol, EXERCISE_WEIGHT_UNIT } from '../../utils/units'
 
 interface ExerciseEntry {
   id?: string // Local ID for tracking saved state
@@ -44,12 +44,12 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
     loadExercises()
   }, [])
 
-  // Convert display weights to backend units (kg to lbs)
+  // Initialize weights (now both display and backend weights are in kg)
   useEffect(() => {
     setExerciseEntries(prev => 
       prev.map(entry => ({
         ...entry,
-        weight: convertWeight(entry.display_weight, EXERCISE_WEIGHT_UNIT, 'lbs')
+        weight: entry.display_weight
       }))
     )
   }, [])
@@ -86,9 +86,9 @@ function BatchExerciseForm({ date, onSuccess }: BatchExerciseFormProps) {
       prev.map((entry, i) => {
         if (i === index) {
           const updated = { ...entry, [field]: value }
-          // If updating display_weight, also update the backend weight
+          // If updating display_weight, also update the backend weight (now both in kg)
           if (field === 'display_weight') {
-            updated.weight = convertWeight(value as number, EXERCISE_WEIGHT_UNIT, 'lbs')
+            updated.weight = value as number
           }
           // If updating exercise_id, mark as not saved since it changed
           if (field === 'exercise_id') {

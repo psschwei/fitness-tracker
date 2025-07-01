@@ -239,7 +239,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                             <div className="text-sm text-gray-500">
                               {exercise.sets_data.map((set, index) => (
                                 <div key={index}>
-                                  {set.weight === 0 ? 'Bodyweight' : formatWeight(convertWeight(set.weight, 'lbs', EXERCISE_WEIGHT_UNIT), EXERCISE_WEIGHT_UNIT)} × {set.reps} reps × {set.sets} sets
+                                  {set.weight === 0 ? 'Bodyweight' : formatWeight(set.weight, EXERCISE_WEIGHT_UNIT)} × {set.reps} reps × {set.sets} sets
                                 </div>
                               ))}
                             </div>
