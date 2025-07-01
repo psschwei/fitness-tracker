@@ -26,8 +26,15 @@ function Journal() {
       const entry = await journalApi.getDailyEntry(dateString)
       setDailyEntry(entry)
     } catch (err) {
-      setError('Failed to load daily entry')
       console.error('Error loading daily entry:', err)
+      // Create an empty entry if the API fails
+      const emptyEntry: DailyEntry = {
+        date: dateString,
+        body_composition: undefined,
+        workouts: []
+      }
+      setDailyEntry(emptyEntry)
+      setError('Failed to load daily entry data, but you can still add new entries')
     } finally {
       setLoading(false)
     }
@@ -129,11 +136,15 @@ function Journal() {
       />
 
       <div className="space-y-6">
-        {dailyEntry && (
+        {dailyEntry ? (
           <DailyEntryView
             entry={dailyEntry}
             onUpdate={handleEntryUpdate}
           />
+        ) : (
+          <div className="text-center py-8">
+            <div className="text-gray-500">Loading entry...</div>
+          </div>
         )}
         
         <DailyActivityForm 

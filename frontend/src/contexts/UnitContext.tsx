@@ -1,10 +1,10 @@
 import React, { createContext, useContext, ReactNode } from 'react'
-import { EXERCISE_WEIGHT_UNIT, BODY_WEIGHT_UNIT, LENGTH_UNIT } from '../utils/units'
+import { EXERCISE_WEIGHT_UNIT, BODY_WEIGHT_UNIT, LENGTH_UNIT, WeightUnit, LengthUnit } from '../utils/units'
 
 interface UnitContextType {
-  exerciseWeightUnit: string
-  bodyWeightUnit: string
-  lengthUnit: string
+  exerciseWeightUnit: WeightUnit
+  bodyWeightUnit: WeightUnit
+  lengthUnit: LengthUnit
 }
 
 const UnitContext = createContext<UnitContextType | undefined>(undefined)

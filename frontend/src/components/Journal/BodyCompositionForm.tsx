@@ -10,7 +10,7 @@ interface BodyCompositionFormProps {
 }
 
 function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
-  const { units } = useUnits()
+  const units = useUnits()
   const [formData, setFormData] = useState<BodyCompositionCreate>({
     date,
     weight_pounds: 0,
@@ -32,17 +32,17 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   // Load latest body composition data to pre-populate form
   useEffect(() => {
     loadLatestData()
-  }, [units.bodyWeight, units.length])
+  }, [units.bodyWeightUnit, units.lengthUnit])
 
   const loadLatestData = async () => {
     try {
       const latestData = await bodyCompositionApi.getLatest()
       
       // Convert backend units to display units
-      const displayWeightValue = convertWeight(latestData.weight_pounds, 'lbs', units.bodyWeight)
-      const displayHeightValue = latestData.height_inches ? convertLength(latestData.height_inches, 'inches', units.length) : 0
-      const displayWaistValue = latestData.waist_inches ? convertLength(latestData.waist_inches, 'inches', units.length) : 0
-      const displayNeckValue = latestData.neck_inches ? convertLength(latestData.neck_inches, 'inches', units.length) : 0
+      const displayWeightValue = convertWeight(latestData.weight_pounds, 'lbs', units.bodyWeightUnit)
+      const displayHeightValue = latestData.height_inches ? convertLength(latestData.height_inches, 'inches', units.lengthUnit) : 0
+      const displayWaistValue = latestData.waist_inches ? convertLength(latestData.waist_inches, 'inches', units.lengthUnit) : 0
+      const displayNeckValue = latestData.neck_inches ? convertLength(latestData.neck_inches, 'inches', units.lengthUnit) : 0
       
       setDisplayWeight(displayWeightValue)
       setDisplayHeight(displayHeightValue)
@@ -67,12 +67,12 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
   useEffect(() => {
     setFormData(prev => ({
       ...prev,
-      weight_pounds: convertWeight(displayWeight, units.bodyWeight, 'lbs'),
-      height_inches: displayHeight > 0 ? convertLength(displayHeight, units.length, 'inches') : null,
-      waist_inches: displayWaist > 0 ? convertLength(displayWaist, units.length, 'inches') : null,
-      neck_inches: displayNeck > 0 ? convertLength(displayNeck, units.length, 'inches') : null
+      weight_pounds: convertWeight(displayWeight, units.bodyWeightUnit, 'lbs'),
+      height_inches: displayHeight > 0 ? convertLength(displayHeight, units.lengthUnit, 'inches') : null,
+      waist_inches: displayWaist > 0 ? convertLength(displayWaist, units.lengthUnit, 'inches') : null,
+      neck_inches: displayNeck > 0 ? convertLength(displayNeck, units.lengthUnit, 'inches') : null
     }))
-  }, [units.bodyWeight, units.length, displayWeight, displayHeight, displayWaist, displayNeck])
+  }, [units.bodyWeightUnit, units.lengthUnit, displayWeight, displayHeight, displayWaist, displayNeck])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -138,7 +138,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="height_inches" className="block text-sm font-medium text-gray-700 mb-1">
-            Height ({getLengthUnitSymbol(units.length)})
+            Height ({getLengthUnitSymbol(units.lengthUnit)})
           </label>
           <input
             type="number"
@@ -155,7 +155,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
 
         <div>
           <label htmlFor="neck_inches" className="block text-sm font-medium text-gray-700 mb-1">
-            Neck Circumference ({getLengthUnitSymbol(units.length)})
+            Neck Circumference ({getLengthUnitSymbol(units.lengthUnit)})
           </label>
           <input
             type="number"
@@ -174,7 +174,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="weight_pounds" className="block text-sm font-medium text-gray-700 mb-1">
-            Weight ({getWeightUnitSymbol(units.bodyWeight)})
+            Weight ({getWeightUnitSymbol(units.bodyWeightUnit)})
           </label>
           <input
             type="number"
@@ -191,7 +191,7 @@ function BodyCompositionForm({ date, onSuccess }: BodyCompositionFormProps) {
 
         <div>
           <label htmlFor="waist_inches" className="block text-sm font-medium text-gray-700 mb-1">
-            Waist Circumference ({getLengthUnitSymbol(units.length)})
+            Waist Circumference ({getLengthUnitSymbol(units.lengthUnit)})
           </label>
           <input
             type="number"

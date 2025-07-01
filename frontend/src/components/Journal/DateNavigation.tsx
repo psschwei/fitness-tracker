@@ -14,7 +14,9 @@ function DateNavigation({
   onDateSelect,
 }: DateNavigationProps) {
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = new Date(event.target.value)
+    // Create a date at the start of the day in local timezone
+    const [year, month, day] = event.target.value.split('-').map(Number)
+    const newDate = new Date(year, month - 1, day) // month is 0-indexed
     onDateSelect(newDate)
   }
 
