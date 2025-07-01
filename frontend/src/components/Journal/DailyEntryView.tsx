@@ -4,7 +4,7 @@ import { bodyCompositionApi, workoutApi } from '../../api/client'
 import BodyCompositionForm from './BodyCompositionForm'
 import BodyCompositionEditForm from './BodyCompositionEditForm'
 import WorkoutEditForm from './WorkoutEditForm'
-import BatchExerciseForm from './BatchExerciseForm'
+import WorkoutBuilder from './WorkoutBuilder'
 import { convertWeight, convertLength, formatWeight, formatLength, calculateBMI, formatBMI, formatBodyFat, BODY_WEIGHT_UNIT, EXERCISE_WEIGHT_UNIT, LENGTH_UNIT } from '../../utils/units'
 
 interface DailyEntryViewProps {
@@ -51,6 +51,18 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
       } catch (err) {
         console.error('Error deleting exercise:', err)
         alert('Failed to delete exercise')
+      }
+    }
+  }
+
+  const handleCompleteWorkout = async (workoutId: number) => {
+    if (confirm('Are you sure you want to mark this workout as completed?')) {
+      try {
+        await workoutApi.completeWorkout(workoutId)
+        onUpdate()
+      } catch (err) {
+        console.error('Error completing workout:', err)
+        alert('Failed to complete workout')
       }
     }
   }
@@ -163,7 +175,7 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
         {workouts.length > 0 ? (
           <div className="space-y-4">
             {workouts.map((workout) => (
-              <div key={workout.id} className="bg-gray-50 rounded-lg p-4">
+              <div key={workout.id} className={`bg-gray-50 rounded-lg p-4 ${workout.status === 'in_progress' ? 'border-l-4 border-yellow-400' : 'border-l-4 border-green-400'}`}>
                 {editingWorkoutId === workout.id ? (
                   <WorkoutEditForm
                     workout={workout}
@@ -176,8 +188,26 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
                 ) : (
                   <>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-gray-700">Workout</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="text-sm font-medium text-gray-700">Workout</h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          workout.status === 'in_progress' 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {workout.status === 'in_progress' ? 'In Progress' : 'Completed'}
+                        </span>
+                      </div>
                       <div className="flex space-x-2">
+                        {workout.status === 'in_progress' && (
+                          <button
+                            onClick={() => handleCompleteWorkout(workout.id)}
+                            className="text-green-500 hover:text-green-700 text-sm font-medium"
+                            title="Complete workout"
+                          >
+                            Complete
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditingWorkoutId(workout.id)}
                           className="text-blue-500 hover:text-blue-700 text-sm font-medium"
@@ -236,7 +266,20 @@ function DailyEntryView({ entry, onUpdate }: DailyEntryViewProps) {
           </div>
         ) : null}
 
-        <BatchExerciseForm date={entry.date} onSuccess={onUpdate} />
+        {/* Show in-progress workouts that can be resumed */}
+        {workouts.filter(w => w.status === 'in_progress').length > 0 && (
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <h3 className="text-sm font-medium text-yellow-800 mb-2">
+              In-Progress Workouts
+            </h3>
+            <p className="text-sm text-yellow-700 mb-3">
+              You have {workouts.filter(w => w.status === 'in_progress').length} workout(s) in progress. 
+              You can continue adding exercises to them.
+            </p>
+          </div>
+        )}
+
+        <WorkoutBuilder date={entry.date} onSuccess={onUpdate} />
       </div>
     </div>
   )
