@@ -146,7 +146,7 @@ function WorkoutEditForm({ workout, onSuccess, onCancel }: WorkoutEditFormProps)
 
       <div>
         <label htmlFor="workout-notes" className="block text-sm font-medium text-gray-700 mb-1">
-          Workout Notes
+          Workout Notes (Optional)
         </label>
         <textarea
           id="workout-notes"

@@ -20,9 +20,9 @@ interface ExerciseEntry {
 
 function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
   const [exercises, setExercises] = useState<Exercise[]>([])
-  const [workoutNotes, setWorkoutNotes] = useState('')
   const [currentWorkout, setCurrentWorkout] = useState<Workout | null>(null)
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>([])
+  const [workoutNotes, setWorkoutNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -41,23 +41,18 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
   }
 
   const createWorkout = async () => {
-    if (!workoutNotes.trim()) {
-      setError('Please add some notes for the workout')
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)
       
       const workoutData: WorkoutCreate = {
         date,
-        notes: workoutNotes,
         exercises: [] // Start with no exercises
       }
       
       const newWorkout = await workoutApi.create(workoutData)
       setCurrentWorkout(newWorkout)
+      setWorkoutNotes(newWorkout.notes || '')
       setSuccessMessage('Workout created! Now add exercises.')
       
       // Clear success message after 3 seconds
@@ -114,6 +109,29 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
     }
   }
 
+  const updateWorkoutNotes = async () => {
+    if (!currentWorkout) {
+      setError('No workout to update')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      
+      await workoutApi.update(currentWorkout.id, { notes: workoutNotes.trim() || undefined })
+      setSuccessMessage('Workout notes updated!')
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000)
+    } catch (err) {
+      setError('Failed to update workout notes')
+      console.error('Error updating workout notes:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const completeWorkout = async () => {
     if (!currentWorkout) {
       setError('No workout to complete')
@@ -127,8 +145,8 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
       await workoutApi.completeWorkout(currentWorkout.id)
       setSuccessMessage('Workout completed!')
       setCurrentWorkout(null)
-      setWorkoutNotes('')
       setExerciseEntries([])
+      setWorkoutNotes('')
       onSuccess()
       
       // Clear success message after 3 seconds
@@ -211,24 +229,9 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Workout</h3>
           
           <div className="space-y-4">
-            <div>
-              <label htmlFor="workout-notes" className="block text-sm font-medium text-gray-700 mb-1">
-                Workout Notes
-              </label>
-              <textarea
-                id="workout-notes"
-                value={workoutNotes}
-                onChange={(e) => setWorkoutNotes(e.target.value)}
-                className="input w-full"
-                rows={3}
-                placeholder="Describe your workout (e.g., 'Upper body strength', 'Cardio session')..."
-                required
-              />
-            </div>
-
             <button
               onClick={createWorkout}
-              disabled={loading || !workoutNotes.trim()}
+              disabled={loading}
               className="btn btn-primary w-full"
             >
               {loading ? 'Creating...' : 'Create Workout'}
@@ -255,8 +258,31 @@ function WorkoutBuilder({ date, onSuccess }: WorkoutBuilderProps) {
 
           <div className="mb-4 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
             <p className="text-sm text-blue-800">
-              <strong>Workout:</strong> {currentWorkout.notes}
+              <strong>Workout:</strong> {currentWorkout.notes || 'No notes added yet'}
             </p>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="workout-notes" className="block text-sm font-medium text-gray-700 mb-1">
+              Workout Notes (Optional)
+            </label>
+            <div className="flex space-x-2">
+              <textarea
+                id="workout-notes"
+                value={workoutNotes}
+                onChange={(e) => setWorkoutNotes(e.target.value)}
+                className="input flex-1"
+                rows={3}
+                placeholder="Add notes about this workout..."
+              />
+              <button
+                onClick={updateWorkoutNotes}
+                disabled={loading}
+                className="btn btn-secondary whitespace-nowrap"
+              >
+                {loading ? 'Updating...' : 'Update Notes'}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
