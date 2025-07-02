@@ -27,14 +27,24 @@ JournalContentArea::JournalContentArea(DateManager *dateManager, ::DataManager *
     // Connect add new button
     connect(m_addNewButton, &QPushButton::clicked, this, &JournalContentArea::onAddNewClicked);
     
+    // Connect exercise tracking signals
+    connect(m_workoutBuilder, &WorkoutBuilder::workoutCreated, this, &JournalContentArea::onWorkoutCreated);
+    connect(m_workoutView, &WorkoutView::workoutDeleted, this, &JournalContentArea::onWorkoutDeleted);
+    connect(m_exerciseLibrary, &ExerciseLibrary::exerciseAdded, this, &JournalContentArea::onExerciseAdded);
+    connect(m_exerciseLibrary, &ExerciseLibrary::exerciseUpdated, this, &JournalContentArea::onExerciseUpdated);
+    connect(m_exerciseLibrary, &ExerciseLibrary::exerciseDeleted, this, &JournalContentArea::onExerciseDeleted);
+    
     // Initialize content
     updateContent();
 }
 
 void JournalContentArea::setupUI()
 {
-    // Create stacked widget to switch between different states
-    m_stackedWidget = new QStackedWidget(this);
+    // Create tab widget for different sections
+    m_tabWidget = new QTabWidget(this);
+    
+    // Create stacked widget for body composition
+    m_stackedWidget = new QStackedWidget();
     
     // Create empty state widget
     QWidget *emptyStateWidget = new QWidget;
@@ -65,10 +75,21 @@ void JournalContentArea::setupUI()
     m_stackedWidget->addWidget(m_bodyCompositionForm); // Index 1: Form
     m_stackedWidget->addWidget(m_bodyCompositionView); // Index 2: View
     
+    // Create exercise tracking components
+    m_workoutBuilder = new WorkoutBuilder(m_dataManager);
+    m_workoutView = new WorkoutView(m_dataManager);
+    m_exerciseLibrary = new ExerciseLibrary(m_dataManager);
+    
+    // Add tabs
+    m_tabWidget->addTab(m_stackedWidget, "Body Composition");
+    m_tabWidget->addTab(m_workoutBuilder, "Workout Builder");
+    m_tabWidget->addTab(m_workoutView, "Workout History");
+    m_tabWidget->addTab(m_exerciseLibrary, "Exercise Library");
+    
     // Create main layout
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(m_stackedWidget);
+    layout->addWidget(m_tabWidget);
     
     setLayout(layout);
 }
@@ -162,4 +183,34 @@ void JournalContentArea::onDeleteRequested()
 void JournalContentArea::onAddNewClicked()
 {
     showBodyCompositionForm();
+}
+
+void JournalContentArea::onWorkoutCreated()
+{
+    // Refresh workout view
+    m_workoutView->refreshData();
+}
+
+void JournalContentArea::onWorkoutDeleted()
+{
+    // Refresh workout builder
+    m_workoutBuilder->updateExerciseComboBox();
+}
+
+void JournalContentArea::onExerciseAdded()
+{
+    // Refresh workout builder with new exercises
+    m_workoutBuilder->updateExerciseComboBox();
+}
+
+void JournalContentArea::onExerciseUpdated()
+{
+    // Refresh workout builder with updated exercises
+    m_workoutBuilder->updateExerciseComboBox();
+}
+
+void JournalContentArea::onExerciseDeleted()
+{
+    // Refresh workout builder with updated exercises
+    m_workoutBuilder->updateExerciseComboBox();
 } 

@@ -4,7 +4,10 @@
 #include <QObject>
 #include <QDate>
 #include <QMap>
+#include <QList>
 #include "bodycomposition.h"
+#include "exercise.h"
+#include "workout.h"
 
 class DataManager : public QObject
 {
@@ -20,6 +23,22 @@ public:
     void deleteBodyComposition(const QDate &date);
     QList<QDate> getBodyCompositionDates() const;
     
+    // Exercise library management
+    bool saveExercise(const Exercise &exercise);
+    Exercise loadExercise(int id);
+    QList<Exercise> getAllExercises() const;
+    QList<Exercise> getExercisesByCategory(const QString &category) const;
+    bool deleteExercise(int id);
+    int getNextExerciseId() const;
+    
+    // Workout management
+    bool saveWorkout(const Workout &workout);
+    Workout loadWorkout(int id);
+    QList<Workout> getAllWorkouts() const;
+    QList<Workout> getWorkoutsByDate(const QDate &date) const;
+    bool deleteWorkout(int id);
+    int getNextWorkoutId() const;
+    
     // Data persistence
     bool loadData();
     bool saveData();
@@ -32,6 +51,8 @@ private:
     void ensureDataDirectory() const;
     
     QMap<QDate, BodyComposition> m_bodyCompositionData;
+    QMap<int, Exercise> m_exercises;
+    QMap<int, Workout> m_workouts;
     QString m_dataFilePath;
 };
 

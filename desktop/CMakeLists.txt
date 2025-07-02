@@ -21,8 +21,14 @@ set(SOURCES
     src/datemanager.cpp
     src/bodycompositionform.cpp
     src/bodycompositionview.cpp
+    src/workoutbuilder.cpp
+    src/workoutview.cpp
+    src/exerciselibrary.cpp
     src/models/bodycomposition.cpp
     src/models/datamanager.cpp
+    src/models/exercise.cpp
+    src/models/setdata.cpp
+    src/models/workout.cpp
     src/utils/calculations.cpp
 )
 
@@ -33,8 +39,14 @@ set(HEADERS
     src/datemanager.h
     src/bodycompositionform.h
     src/bodycompositionview.h
+    src/workoutbuilder.h
+    src/workoutview.h
+    src/exerciselibrary.h
     src/models/bodycomposition.h
     src/models/datamanager.h
+    src/models/exercise.h
+    src/models/setdata.h
+    src/models/workout.h
     src/utils/calculations.h
 )
 

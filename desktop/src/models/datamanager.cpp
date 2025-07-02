@@ -81,6 +81,34 @@ bool DataManager::loadData()
         }
     }
     
+    // Load exercises
+    if (root.contains("exercises")) {
+        QJsonArray array = root["exercises"].toArray();
+        m_exercises.clear();
+        
+        for (const QJsonValue &value : array) {
+            QJsonObject obj = value.toObject();
+            Exercise exercise = Exercise::fromJson(obj);
+            if (exercise.id() > 0) {
+                m_exercises[exercise.id()] = exercise;
+            }
+        }
+    }
+    
+    // Load workouts
+    if (root.contains("workouts")) {
+        QJsonArray array = root["workouts"].toArray();
+        m_workouts.clear();
+        
+        for (const QJsonValue &value : array) {
+            QJsonObject obj = value.toObject();
+            Workout workout = Workout::fromJson(obj);
+            if (workout.id() > 0) {
+                m_workouts[workout.id()] = workout;
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -100,6 +128,20 @@ bool DataManager::saveData()
     }
     
     root["bodyComposition"] = bodyCompositionArray;
+    
+    // Save exercises
+    QJsonArray exercisesArray;
+    for (const Exercise &exercise : m_exercises.values()) {
+        exercisesArray.append(exercise.toJson());
+    }
+    root["exercises"] = exercisesArray;
+    
+    // Save workouts
+    QJsonArray workoutsArray;
+    for (const Workout &workout : m_workouts.values()) {
+        workoutsArray.append(workout.toJson());
+    }
+    root["workouts"] = workoutsArray;
     
     QJsonDocument doc(root);
     qint64 bytesWritten = file.write(doc.toJson());
@@ -124,4 +166,124 @@ void DataManager::ensureDataDirectory() const
     if (!dir.exists()) {
         dir.mkpath(".");
     }
+}
+
+// Exercise management methods
+bool DataManager::saveExercise(const Exercise &exercise)
+{
+    if (!exercise.isValid()) {
+        return false;
+    }
+    
+    Exercise exerciseToSave = exercise;
+    if (exerciseToSave.id() == 0) {
+        exerciseToSave.setId(getNextExerciseId());
+    }
+    
+    m_exercises[exerciseToSave.id()] = exerciseToSave;
+    bool success = saveData();
+    if (success) {
+        emit dataChanged();
+    }
+    return success;
+}
+
+Exercise DataManager::loadExercise(int id)
+{
+    return m_exercises.value(id, Exercise());
+}
+
+QList<Exercise> DataManager::getAllExercises() const
+{
+    return m_exercises.values();
+}
+
+QList<Exercise> DataManager::getExercisesByCategory(const QString &category) const
+{
+    QList<Exercise> filtered;
+    for (const Exercise &exercise : m_exercises.values()) {
+        if (exercise.category() == category && exercise.isActive()) {
+            filtered.append(exercise);
+        }
+    }
+    return filtered;
+}
+
+bool DataManager::deleteExercise(int id)
+{
+    if (m_exercises.remove(id) > 0) {
+        saveData();
+        emit dataChanged();
+        return true;
+    }
+    return false;
+}
+
+int DataManager::getNextExerciseId() const
+{
+    int maxId = 0;
+    for (int id : m_exercises.keys()) {
+        maxId = qMax(maxId, id);
+    }
+    return maxId + 1;
+}
+
+// Workout management methods
+bool DataManager::saveWorkout(const Workout &workout)
+{
+    if (!workout.isValid()) {
+        return false;
+    }
+    
+    Workout workoutToSave = workout;
+    if (workoutToSave.id() == 0) {
+        workoutToSave.setId(getNextWorkoutId());
+    }
+    
+    m_workouts[workoutToSave.id()] = workoutToSave;
+    bool success = saveData();
+    if (success) {
+        emit dataChanged();
+    }
+    return success;
+}
+
+Workout DataManager::loadWorkout(int id)
+{
+    return m_workouts.value(id, Workout());
+}
+
+QList<Workout> DataManager::getAllWorkouts() const
+{
+    return m_workouts.values();
+}
+
+QList<Workout> DataManager::getWorkoutsByDate(const QDate &date) const
+{
+    QList<Workout> filtered;
+    for (const Workout &workout : m_workouts.values()) {
+        if (workout.date() == date) {
+            filtered.append(workout);
+        }
+    }
+    return filtered;
+}
+
+bool DataManager::deleteWorkout(int id)
+{
+    if (m_workouts.remove(id) > 0) {
+        saveData();
+        emit dataChanged();
+        return true;
+    }
+    return false;
+}
+
+int DataManager::getNextWorkoutId() const
+{
+    int maxId = 0;
+    for (int id : m_workouts.keys()) {
+        maxId = qMax(maxId, id);
+    }
+    return maxId + 1;
 } 

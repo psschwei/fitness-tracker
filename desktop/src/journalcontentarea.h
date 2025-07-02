@@ -6,9 +6,13 @@
 #include <QVBoxLayout>
 #include <QStackedWidget>
 #include <QPushButton>
+#include <QTabWidget>
 #include "datemanager.h"
 #include "bodycompositionform.h"
 #include "bodycompositionview.h"
+#include "workoutbuilder.h"
+#include "workoutview.h"
+#include "exerciselibrary.h"
 #include "models/datamanager.h"
 
 class JournalContentArea : public QWidget
@@ -25,6 +29,11 @@ private slots:
     void onEditRequested();
     void onDeleteRequested();
     void onAddNewClicked();
+    void onWorkoutCreated();
+    void onWorkoutDeleted();
+    void onExerciseAdded();
+    void onExerciseUpdated();
+    void onExerciseDeleted();
 
 private:
     void setupUI();
@@ -41,6 +50,12 @@ private:
     BodyCompositionForm *m_bodyCompositionForm;
     BodyCompositionView *m_bodyCompositionView;
     QPushButton *m_addNewButton;
+    
+    // Exercise tracking components
+    QTabWidget *m_tabWidget;
+    WorkoutBuilder *m_workoutBuilder;
+    WorkoutView *m_workoutView;
+    ExerciseLibrary *m_exerciseLibrary;
 };
 
 #endif // JOURNALCONTENTAREA_H 
