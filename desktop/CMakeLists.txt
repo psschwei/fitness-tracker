@@ -19,6 +19,8 @@ set(SOURCES
     src/datenavigationbar.cpp
     src/journalcontentarea.cpp
     src/datemanager.cpp
+    src/bodycompositionform.cpp
+    src/models/bodycomposition.cpp
 )
 
 set(HEADERS
@@ -26,6 +28,8 @@ set(HEADERS
     src/datenavigationbar.h
     src/journalcontentarea.h
     src/datemanager.h
+    src/bodycompositionform.h
+    src/models/bodycomposition.h
 )
 
 # Create executable
