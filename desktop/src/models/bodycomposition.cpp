@@ -1,5 +1,6 @@
 #include "bodycomposition.h"
 #include <QDebug>
+#include <QJsonDocument>
 
 BodyComposition::BodyComposition()
     : m_weight(0.0)
@@ -64,4 +65,54 @@ QStringList BodyComposition::validationErrors() const
 bool BodyComposition::isEmpty() const
 {
     return m_weight <= 0.0 && m_waistCircumference <= 0.0 && m_height <= 0.0 && m_neckCircumference <= 0.0 && m_notes.isEmpty();
+}
+
+QJsonObject BodyComposition::toJson() const
+{
+    QJsonObject json;
+    json["date"] = m_date.toString(Qt::ISODate);
+    json["weight"] = m_weight;
+    json["waistCircumference"] = m_waistCircumference;
+    json["height"] = m_height;
+    json["neckCircumference"] = m_neckCircumference;
+    json["notes"] = m_notes;
+    json["timestamp"] = m_timestamp.toString(Qt::ISODate);
+    return json;
+}
+
+BodyComposition BodyComposition::fromJson(const QJsonObject &json)
+{
+    BodyComposition composition;
+    
+    if (json.contains("date")) {
+        composition.m_date = QDate::fromString(json["date"].toString(), Qt::ISODate);
+    }
+    
+    if (json.contains("weight")) {
+        composition.m_weight = json["weight"].toDouble();
+    }
+    
+    if (json.contains("waistCircumference")) {
+        composition.m_waistCircumference = json["waistCircumference"].toDouble();
+    }
+    
+    if (json.contains("height")) {
+        composition.m_height = json["height"].toDouble();
+    }
+    
+    if (json.contains("neckCircumference")) {
+        composition.m_neckCircumference = json["neckCircumference"].toDouble();
+    }
+    
+    if (json.contains("notes")) {
+        composition.m_notes = json["notes"].toString();
+    }
+    
+    if (json.contains("timestamp")) {
+        composition.m_timestamp = QDateTime::fromString(json["timestamp"].toString(), Qt::ISODate);
+    } else {
+        composition.m_timestamp = QDateTime::currentDateTime();
+    }
+    
+    return composition;
 } 

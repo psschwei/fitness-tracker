@@ -20,7 +20,9 @@ set(SOURCES
     src/journalcontentarea.cpp
     src/datemanager.cpp
     src/bodycompositionform.cpp
+    src/bodycompositionview.cpp
     src/models/bodycomposition.cpp
+    src/models/datamanager.cpp
 )
 
 set(HEADERS
@@ -29,7 +31,9 @@ set(HEADERS
     src/journalcontentarea.h
     src/datemanager.h
     src/bodycompositionform.h
+    src/bodycompositionview.h
     src/models/bodycomposition.h
+    src/models/datamanager.h
 )
 
 # Create executable

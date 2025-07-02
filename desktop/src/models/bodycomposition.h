@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QString>
 #include <QDateTime>
+#include <QJsonObject>
 
 class BodyComposition
 {
@@ -34,6 +35,10 @@ public:
     
     // Utility
     bool isEmpty() const;
+    
+    // Serialization
+    QJsonObject toJson() const;
+    static BodyComposition fromJson(const QJsonObject &json);
 
 private:
     QDate m_date;

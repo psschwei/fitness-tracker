@@ -6,6 +6,7 @@
 #include "datemanager.h"
 #include "datenavigationbar.h"
 #include "journalcontentarea.h"
+#include "models/datamanager.h"
 
 class MainWindow : public QMainWindow
 {
@@ -19,6 +20,7 @@ private:
     void setupMenuBar();
 
     DateManager *m_dateManager;
+    ::DataManager *m_dataManager;
     DateNavigationBar *m_dateNavigationBar;
     JournalContentArea *m_journalContentArea;
 };

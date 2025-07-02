@@ -8,6 +8,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_dateManager(new DateManager(this))
+    , m_dataManager(new ::DataManager(this))
 {
     setupUI();
     setupMenuBar();
@@ -31,7 +32,7 @@ void MainWindow::setupUI()
     
     // Create components
     m_dateNavigationBar = new DateNavigationBar(m_dateManager, this);
-    m_journalContentArea = new JournalContentArea(m_dateManager, this);
+    m_journalContentArea = new JournalContentArea(m_dateManager, m_dataManager, this);
     
     // Add to layout
     mainLayout->addWidget(m_dateNavigationBar);
