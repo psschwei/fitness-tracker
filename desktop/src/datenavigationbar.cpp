@@ -26,6 +26,9 @@ void DateNavigationBar::setupUI()
     m_dateEdit = new QDateEdit(this);
     m_dateEdit->setCalendarPopup(true);
     m_dateEdit->setDisplayFormat("MM/dd/yyyy");
+    m_dateEdit->setReadOnly(true);
+    m_dateEdit->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    m_dateEdit->setFocusPolicy(Qt::NoFocus);
     
     m_todayButton = new QPushButton("Today", this);
     m_previousButton = new QPushButton("←", this);
@@ -52,6 +55,9 @@ void DateNavigationBar::setupUI()
     layout->addWidget(m_dateLabel);
     
     setLayout(layout);
+
+    // Set initial focus to the Today button
+    m_todayButton->setFocus();
 }
 
 void DateNavigationBar::updateDateDisplay()

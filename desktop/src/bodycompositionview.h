@@ -40,6 +40,8 @@ private:
     QLabel *m_neckLabel;
     QLabel *m_notesLabel;
     QLabel *m_timestampLabel;
+    QLabel *m_bmiLabel;
+    QLabel *m_bodyFatLabel;
     QPushButton *m_editButton;
     QPushButton *m_deleteButton;
     QGroupBox *m_dataGroup;

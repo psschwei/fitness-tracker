@@ -102,6 +102,14 @@ void JournalContentArea::showBodyCompositionForm()
 {
     m_bodyCompositionForm->setDate(m_dateManager->currentDate());
     m_bodyCompositionForm->clear();
+    
+    // Try to prefill with yesterday's data
+    QDate yesterday = m_dateManager->currentDate().addDays(-1);
+    if (m_dataManager->hasBodyComposition(yesterday)) {
+        BodyComposition yesterdayData = m_dataManager->loadBodyComposition(yesterday);
+        m_bodyCompositionForm->prefillWithData(yesterdayData);
+    }
+    
     m_stackedWidget->setCurrentIndex(1);
 }
 
@@ -132,7 +140,16 @@ void JournalContentArea::onCancelled()
 
 void JournalContentArea::onEditRequested()
 {
-    showBodyCompositionForm();
+    m_bodyCompositionForm->setDate(m_dateManager->currentDate());
+    
+    // Load current data for editing
+    QDate currentDate = m_dateManager->currentDate();
+    if (m_dataManager->hasBodyComposition(currentDate)) {
+        BodyComposition currentData = m_dataManager->loadBodyComposition(currentDate);
+        m_bodyCompositionForm->setData(currentData);
+    }
+    
+    m_stackedWidget->setCurrentIndex(1);
 }
 
 void JournalContentArea::onDeleteRequested()

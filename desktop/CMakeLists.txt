@@ -23,6 +23,7 @@ set(SOURCES
     src/bodycompositionview.cpp
     src/models/bodycomposition.cpp
     src/models/datamanager.cpp
+    src/utils/calculations.cpp
 )
 
 set(HEADERS
@@ -34,6 +35,7 @@ set(HEADERS
     src/bodycompositionview.h
     src/models/bodycomposition.h
     src/models/datamanager.h
+    src/utils/calculations.h
 )
 
 # Create executable

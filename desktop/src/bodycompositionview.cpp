@@ -1,5 +1,6 @@
 #include "bodycompositionview.h"
 #include <QMessageBox>
+#include "utils/calculations.h"
 
 BodyCompositionView::BodyCompositionView(QWidget *parent)
     : QWidget(parent)
@@ -20,6 +21,8 @@ void BodyCompositionView::setupUI()
     m_neckLabel = new QLabel(this);
     m_notesLabel = new QLabel(this);
     m_timestampLabel = new QLabel(this);
+    m_bmiLabel = new QLabel(this);
+    m_bodyFatLabel = new QLabel(this);
     
     // Style the labels
     QString labelStyle = "QLabel { font-size: 14px; padding: 5px; }";
@@ -30,6 +33,10 @@ void BodyCompositionView::setupUI()
     m_notesLabel->setStyleSheet(labelStyle);
     m_timestampLabel->setStyleSheet("QLabel { font-size: 12px; color: #666; padding: 5px; }");
     
+    // Style calculation labels
+    m_bmiLabel->setStyleSheet("QLabel { font-size: 16px; color: #007bff; padding: 8px; font-weight: bold; }");
+    m_bodyFatLabel->setStyleSheet("QLabel { font-size: 16px; color: #28a745; padding: 8px; font-weight: bold; }");
+    
     m_notesLabel->setWordWrap(true);
     
     // Create buttons
@@ -37,26 +44,43 @@ void BodyCompositionView::setupUI()
     m_deleteButton = new QPushButton("Delete", this);
     m_deleteButton->setStyleSheet("QPushButton { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
     
-    // Create data group
+    // Create data group with measurements on left, calculations on right
     m_dataGroup = new QGroupBox("Body Composition Data", this);
-    QGridLayout *dataLayout = new QGridLayout(m_dataGroup);
+    QHBoxLayout *dataLayout = new QHBoxLayout(m_dataGroup);
     
-    dataLayout->addWidget(new QLabel("Weight:"), 0, 0);
-    dataLayout->addWidget(m_weightLabel, 0, 1);
+    // Left side - Measurements
+    QGridLayout *measurementsLayout = new QGridLayout;
     
-    dataLayout->addWidget(new QLabel("Waist:"), 1, 0);
-    dataLayout->addWidget(m_waistLabel, 1, 1);
+    measurementsLayout->addWidget(new QLabel("Weight:"), 0, 0);
+    measurementsLayout->addWidget(m_weightLabel, 0, 1);
     
-    dataLayout->addWidget(new QLabel("Height:"), 2, 0);
-    dataLayout->addWidget(m_heightLabel, 2, 1);
+    measurementsLayout->addWidget(new QLabel("Waist:"), 1, 0);
+    measurementsLayout->addWidget(m_waistLabel, 1, 1);
     
-    dataLayout->addWidget(new QLabel("Neck:"), 3, 0);
-    dataLayout->addWidget(m_neckLabel, 3, 1);
+    measurementsLayout->addWidget(new QLabel("Height:"), 2, 0);
+    measurementsLayout->addWidget(m_heightLabel, 2, 1);
     
-    dataLayout->addWidget(new QLabel("Notes:"), 4, 0);
-    dataLayout->addWidget(m_notesLabel, 4, 1);
+    measurementsLayout->addWidget(new QLabel("Neck:"), 3, 0);
+    measurementsLayout->addWidget(m_neckLabel, 3, 1);
     
-    dataLayout->addWidget(m_timestampLabel, 5, 0, 1, 2, Qt::AlignRight);
+    measurementsLayout->addWidget(new QLabel("Notes:"), 4, 0);
+    measurementsLayout->addWidget(m_notesLabel, 4, 1);
+    
+    measurementsLayout->addWidget(m_timestampLabel, 5, 0, 1, 2, Qt::AlignRight);
+    
+    // Right side - Calculations
+    QVBoxLayout *calculationsLayout = new QVBoxLayout;
+    QLabel *calcHeader = new QLabel("Calculations");
+    calcHeader->setAlignment(Qt::AlignLeft);
+    calculationsLayout->addWidget(calcHeader);
+    calculationsLayout->addWidget(m_bmiLabel);
+    calculationsLayout->addWidget(m_bodyFatLabel);
+    calculationsLayout->addStretch();
+    
+    // Add both layouts to the main data layout
+    dataLayout->addLayout(measurementsLayout);
+    dataLayout->addSpacing(20); // Add some spacing between sections
+    dataLayout->addLayout(calculationsLayout);
     
     // Create button layout
     QHBoxLayout *buttonLayout = new QHBoxLayout;
@@ -113,6 +137,15 @@ void BodyCompositionView::updateDisplay()
     }
     
     m_timestampLabel->setText(QString("Last updated: %1").arg(m_data.timestamp().toString("MMM dd, yyyy h:mm AP")));
+    
+    // Update calculations
+    QString bmiText = Calculations::formatBMI(m_data.bmi());
+    m_bmiLabel->setText(QString("BMI: %1").arg(bmiText));
+    m_bmiLabel->setStyleSheet("QLabel { font-size: 14px; padding: 5px; }");
+    
+    QString bodyFatText = Calculations::formatBodyFat(m_data.bodyFatPercentage(), m_data.isMale());
+    m_bodyFatLabel->setText(QString("Body Fat: %1").arg(bodyFatText));
+    m_bodyFatLabel->setStyleSheet("QLabel { font-size: 14px; padding: 5px; }");
 }
 
 void BodyCompositionView::onEditClicked()

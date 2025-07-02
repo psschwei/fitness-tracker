@@ -1,9 +1,14 @@
 #include "mainwindow.h"
+#include <QApplication>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QKeyEvent>
+#include <QShortcut>
+#include <QLineEdit>
+#include <QTextEdit>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,6 +22,20 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Fitness Tracker");
     setMinimumSize(600, 400);
     resize(800, 600);
+
+    // Add left/right arrow shortcuts for day navigation
+    QShortcut *leftShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    connect(leftShortcut, &QShortcut::activated, this, [this]() {
+        QWidget *fw = QApplication::focusWidget();
+        if (qobject_cast<QLineEdit*>(fw) || qobject_cast<QTextEdit*>(fw)) return;
+        m_dateManager->goToPrevious();
+    });
+    QShortcut *rightShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    connect(rightShortcut, &QShortcut::activated, this, [this]() {
+        QWidget *fw = QApplication::focusWidget();
+        if (qobject_cast<QLineEdit*>(fw) || qobject_cast<QTextEdit*>(fw)) return;
+        m_dateManager->goToNext();
+    });
 }
 
 void MainWindow::setupUI()
