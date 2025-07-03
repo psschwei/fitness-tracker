@@ -32,6 +32,10 @@ private slots:
     void onExerciseAdded();
     void onExerciseUpdated();
     void onExerciseDeleted();
+    void setupKeyboardShortcuts();
+    void switchToBodyComposition();
+    void switchToWorkouts();
+    void switchToExerciseLibrary();
 
 private:
     void setupUI();

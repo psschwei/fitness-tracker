@@ -5,6 +5,8 @@
 #include <QFrame>
 #include <QStackedWidget>
 #include <QMessageBox>
+#include <QShortcut>
+#include <QKeySequence>
 
 JournalContentArea::JournalContentArea(DateManager *dateManager, ::DataManager *dataManager, QWidget *parent)
     : QWidget(parent)
@@ -32,6 +34,9 @@ JournalContentArea::JournalContentArea(DateManager *dateManager, ::DataManager *
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseAdded, this, &JournalContentArea::onExerciseAdded);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseUpdated, this, &JournalContentArea::onExerciseUpdated);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseDeleted, this, &JournalContentArea::onExerciseDeleted);
+    
+    // Setup keyboard shortcuts for tabs
+    setupKeyboardShortcuts();
     
     // Initialize content
     updateContent();
@@ -203,4 +208,34 @@ void JournalContentArea::onExerciseDeleted()
 {
     // Refresh workout builder with updated exercises
     m_workoutBuilder->updateExerciseComboBox();
+}
+
+void JournalContentArea::setupKeyboardShortcuts()
+{
+    // Body Composition tab - 'b' key
+    QShortcut *bodyCompShortcut = new QShortcut(QKeySequence("b"), this);
+    connect(bodyCompShortcut, &QShortcut::activated, this, &JournalContentArea::switchToBodyComposition);
+    
+    // Workouts tab - 'w' key
+    QShortcut *workoutsShortcut = new QShortcut(QKeySequence("w"), this);
+    connect(workoutsShortcut, &QShortcut::activated, this, &JournalContentArea::switchToWorkouts);
+    
+    // Exercise Library tab - 'e' key
+    QShortcut *exerciseLibraryShortcut = new QShortcut(QKeySequence("e"), this);
+    connect(exerciseLibraryShortcut, &QShortcut::activated, this, &JournalContentArea::switchToExerciseLibrary);
+}
+
+void JournalContentArea::switchToBodyComposition()
+{
+    m_tabWidget->setCurrentIndex(0);
+}
+
+void JournalContentArea::switchToWorkouts()
+{
+    m_tabWidget->setCurrentIndex(1);
+}
+
+void JournalContentArea::switchToExerciseLibrary()
+{
+    m_tabWidget->setCurrentIndex(2);
 } 
