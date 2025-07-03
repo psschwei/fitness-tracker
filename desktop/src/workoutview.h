@@ -6,9 +6,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QScrollArea>
 #include <QGroupBox>
-#include <QTextEdit>
 #include <QDate>
 #include <QList>
 #include "models/datamanager.h"
@@ -20,14 +18,17 @@ class WorkoutView : public QWidget
 
 public:
     explicit WorkoutView(DataManager *dataManager, QWidget *parent = nullptr);
+    
     void setDate(const QDate &date);
     void refreshData();
 
 signals:
-    void workoutDeleted();
+    void editRequested();
+    void deleteRequested();
 
 private slots:
-    void deleteWorkout(int workoutId);
+    void onEditClicked();
+    void onDeleteClicked();
 
 private:
     void setupUI();
@@ -39,8 +40,9 @@ private:
     
     // UI elements
     QLabel *m_noWorkoutsLabel;
-    QScrollArea *m_workoutsScrollArea;
     QWidget *m_workoutsContainer;
+    QPushButton *m_editButton;
+    QPushButton *m_deleteButton;
     QList<Workout> m_currentWorkouts;
 };
 

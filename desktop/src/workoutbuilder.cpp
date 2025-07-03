@@ -1,11 +1,13 @@
 #include "workoutbuilder.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 WorkoutBuilder::WorkoutBuilder(DataManager *dataManager, QWidget *parent)
     : QWidget(parent)
     , m_dataManager(dataManager)
     , m_currentDate(QDate::currentDate())
+    , m_editingWorkoutId(0)
 {
     setupUI();
     updateExerciseComboBox();
@@ -14,6 +16,11 @@ WorkoutBuilder::WorkoutBuilder(DataManager *dataManager, QWidget *parent)
 void WorkoutBuilder::setDate(const QDate &date)
 {
     m_currentDate = date;
+}
+
+void WorkoutBuilder::setEditingWorkoutId(int workoutId)
+{
+    m_editingWorkoutId = workoutId;
 }
 
 void WorkoutBuilder::setupUI()
@@ -28,6 +35,7 @@ void WorkoutBuilder::setupUI()
     m_workoutNotesEdit = new QTextEdit();
     m_workoutNotesEdit->setMaximumHeight(50);
     m_workoutNotesEdit->setPlaceholderText("Add notes about this workout...");
+    m_workoutNotesEdit->installEventFilter(this);
     notesLayout->addWidget(m_workoutNotesEdit);
     
     mainLayout->addWidget(notesGroup);
@@ -53,16 +61,16 @@ void WorkoutBuilder::setupUI()
     // Buttons
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     
-    m_saveButton = new QPushButton("Save Workout");
-    m_saveButton->setStyleSheet("QPushButton { padding: 10px; font-weight: bold; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }");
+    m_saveButton = new QPushButton("Save");
+    m_saveButton->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
     connect(m_saveButton, &QPushButton::clicked, this, &WorkoutBuilder::saveWorkout);
     
-    m_clearButton = new QPushButton("Clear Form");
-    m_clearButton->setStyleSheet("QPushButton { padding: 10px; font-weight: bold; background-color: #f44336; color: white; border: none; border-radius: 4px; }");
-    connect(m_clearButton, &QPushButton::clicked, this, &WorkoutBuilder::clearForm);
+    m_cancelButton = new QPushButton("Cancel");
+    m_cancelButton->setStyleSheet("QPushButton { background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
+    connect(m_cancelButton, &QPushButton::clicked, this, &WorkoutBuilder::onCancelClicked);
     
     buttonLayout->addStretch();
-    buttonLayout->addWidget(m_clearButton);
+    buttonLayout->addWidget(m_cancelButton);
     buttonLayout->addWidget(m_saveButton);
     
     mainLayout->addLayout(buttonLayout);
@@ -127,6 +135,9 @@ void WorkoutBuilder::addExerciseRow()
     row.notesEdit->setMaximumHeight(40);
     row.notesEdit->setPlaceholderText("Notes...");
     
+    // Handle tab key to move to next field
+    row.notesEdit->installEventFilter(this);
+    
     // Create layout for this row (no group box title)
     QWidget *exerciseWidget = new QWidget();
     QGridLayout *exerciseLayout = new QGridLayout(exerciseWidget);
@@ -157,8 +168,8 @@ void WorkoutBuilder::saveWorkout()
         return;
     }
     
-    // Create workout
-    Workout workout(0, m_currentDate, m_workoutNotesEdit->toPlainText().trimmed());
+    // Create workout (use existing ID if editing)
+    Workout workout(m_editingWorkoutId, m_currentDate, m_workoutNotesEdit->toPlainText().trimmed());
     
     // Add exercises (only those with selected exercise names)
     for (const ExerciseRow &row : m_exerciseRows) {
@@ -178,6 +189,8 @@ void WorkoutBuilder::saveWorkout()
             int reps = row.repsEdit->text().toInt();
             int sets = row.setsEdit->text().toInt();
             
+
+            
             // Create sets data
             QList<SetData> setsData;
             SetData set(weight, reps, sets);
@@ -191,7 +204,6 @@ void WorkoutBuilder::saveWorkout()
     
     // Save workout
     if (m_dataManager->saveWorkout(workout)) {
-        showSuccess("Workout saved successfully!");
         emit workoutCreated();
         clearForm();
     } else {
@@ -199,9 +211,59 @@ void WorkoutBuilder::saveWorkout()
     }
 }
 
+void WorkoutBuilder::loadWorkoutData(const QList<Workout> &workouts)
+{
+    clearForm();
+    
+    if (workouts.isEmpty()) {
+        m_editingWorkoutId = 0; // Not editing any workout
+        return;
+    }
+    
+    // Ensure exercise combo boxes are populated
+    updateExerciseComboBox();
+    
+    // Load the first workout (assuming one workout per day for now)
+    const Workout &workout = workouts.first();
+    m_editingWorkoutId = workout.id(); // Set the workout ID we're editing
+    
+    // Set workout notes
+    m_workoutNotesEdit->setPlainText(workout.notes());
+    
+    // Load exercises into the form
+    for (int i = 0; i < workout.exercises().size() && i < m_exerciseRows.size(); ++i) {
+        const WorkoutExercise &exercise = workout.exercises()[i];
+        ExerciseRow &row = m_exerciseRows[i];
+        
+        // Set exercise name
+        for (int j = 0; j < row.exerciseCombo->count(); ++j) {
+            if (row.exerciseCombo->itemData(j).toInt() == exercise.exerciseId()) {
+                row.exerciseCombo->setCurrentIndex(j);
+                break;
+            }
+        }
+        
+        // Set exercise data (use first set for now)
+        if (!exercise.setsData().isEmpty()) {
+            const SetData &set = exercise.setsData().first();
+            qDebug() << "Loading exercise:" << exercise.exerciseName() 
+                     << "Weight:" << set.weight() 
+                     << "Reps:" << set.reps() 
+                     << "Sets:" << set.sets();
+            row.weightEdit->setText(QString::number(set.weight(), 'f', 1));
+            row.repsEdit->setText(QString::number(set.reps()));
+            row.setsEdit->setText(QString::number(set.sets()));
+        }
+        
+        // Set exercise notes
+        row.notesEdit->setPlainText(exercise.notes());
+    }
+}
+
 void WorkoutBuilder::clearForm()
 {
     m_workoutNotesEdit->clear();
+    m_editingWorkoutId = 0; // Reset editing workout ID
     
     // Clear all exercise rows
     for (ExerciseRow &row : m_exerciseRows) {
@@ -282,4 +344,49 @@ void WorkoutBuilder::showError(const QString &message)
 void WorkoutBuilder::showSuccess(const QString &message)
 {
     QMessageBox::information(this, "Success", message);
+}
+
+void WorkoutBuilder::onCancelClicked()
+{
+    emit cancelled();
+}
+
+bool WorkoutBuilder::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Tab) {
+            QTextEdit *currentTextEdit = qobject_cast<QTextEdit*>(obj);
+            if (currentTextEdit) {
+                // Find the next input field in our form
+                QWidget *nextWidget = nullptr;
+                
+                // If it's the workout notes, move to the first exercise combo
+                if (currentTextEdit == m_workoutNotesEdit) {
+                    if (!m_exerciseRows.isEmpty()) {
+                        nextWidget = m_exerciseRows[0].exerciseCombo;
+                    }
+                } else {
+                    // Find which exercise row this notes field belongs to
+                    for (int i = 0; i < m_exerciseRows.size(); ++i) {
+                        if (m_exerciseRows[i].notesEdit == currentTextEdit) {
+                            // Move to the next exercise row's combo box, or to the save button
+                            if (i + 1 < m_exerciseRows.size()) {
+                                nextWidget = m_exerciseRows[i + 1].exerciseCombo;
+                            } else {
+                                nextWidget = m_saveButton;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                if (nextWidget) {
+                    nextWidget->setFocus();
+                    return true; // Event handled
+                }
+            }
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 } 

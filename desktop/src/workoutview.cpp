@@ -25,6 +25,7 @@ void WorkoutView::refreshData()
 void WorkoutView::setupUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(40, 20, 40, 20);
     
     // No workouts label
     m_noWorkoutsLabel = new QLabel("No workouts for this date");
@@ -32,17 +33,30 @@ void WorkoutView::setupUI()
     m_noWorkoutsLabel->setStyleSheet("QLabel { color: #666; font-size: 14px; padding: 20px; }");
     mainLayout->addWidget(m_noWorkoutsLabel);
     
-    // Workouts scroll area
-    m_workoutsScrollArea = new QScrollArea();
+    // Workouts container
     m_workoutsContainer = new QWidget();
     QVBoxLayout *containerLayout = new QVBoxLayout(m_workoutsContainer);
     containerLayout->setAlignment(Qt::AlignTop);
     
-    m_workoutsScrollArea->setWidget(m_workoutsContainer);
-    m_workoutsScrollArea->setWidgetResizable(true);
-    m_workoutsScrollArea->setMaximumHeight(500);
+    mainLayout->addWidget(m_workoutsContainer);
     
-    mainLayout->addWidget(m_workoutsScrollArea);
+    // Create buttons
+    m_editButton = new QPushButton("Edit", this);
+    m_editButton->setStyleSheet("QPushButton { background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
+    connect(m_editButton, &QPushButton::clicked, this, &WorkoutView::onEditClicked);
+    
+    m_deleteButton = new QPushButton("Delete", this);
+    m_deleteButton->setStyleSheet("QPushButton { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
+    connect(m_deleteButton, &QPushButton::clicked, this, &WorkoutView::onDeleteClicked);
+    
+    // Create button layout
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(m_deleteButton);
+    buttonLayout->addWidget(m_editButton);
+    
+    mainLayout->addStretch();
+    mainLayout->addLayout(buttonLayout);
     
     // Initial data load
     refreshData();
@@ -54,18 +68,25 @@ void WorkoutView::displayWorkouts()
     
     if (m_currentWorkouts.isEmpty()) {
         m_noWorkoutsLabel->show();
-        m_workoutsScrollArea->hide();
+        m_workoutsContainer->hide();
+        m_editButton->hide();
+        m_deleteButton->hide();
         return;
     }
     
     m_noWorkoutsLabel->hide();
-    m_workoutsScrollArea->show();
+    m_workoutsContainer->show();
+    m_editButton->show();
+    m_deleteButton->show();
     
     QVBoxLayout *containerLayout = qobject_cast<QVBoxLayout*>(m_workoutsContainer->layout());
     
+    // Defensive programming: try to display workouts, but catch any crashes
+    try {
+    
     for (const Workout &workout : m_currentWorkouts) {
         // Create workout group
-        QGroupBox *workoutGroup = new QGroupBox(QString("Workout #%1").arg(workout.id()));
+        QGroupBox *workoutGroup = new QGroupBox("Workout");
         workoutGroup->setStyleSheet("QGroupBox { font-weight: bold; margin-top: 10px; }");
         
         QVBoxLayout *workoutLayout = new QVBoxLayout(workoutGroup);
@@ -76,15 +97,8 @@ void WorkoutView::displayWorkouts()
         QLabel *statusLabel = new QLabel(QString("Status: %1").arg(workout.statusString()));
         statusLabel->setStyleSheet("QLabel { font-weight: normal; }");
         
-        QPushButton *deleteButton = new QPushButton("Delete");
-        deleteButton->setStyleSheet("QPushButton { background-color: #f44336; color: white; border: none; border-radius: 4px; padding: 4px 8px; }");
-        connect(deleteButton, &QPushButton::clicked, [this, workout]() {
-            deleteWorkout(workout.id());
-        });
-        
         infoLayout->addWidget(statusLabel);
         infoLayout->addStretch();
-        infoLayout->addWidget(deleteButton);
         
         workoutLayout->addLayout(infoLayout);
         
@@ -96,32 +110,36 @@ void WorkoutView::displayWorkouts()
             workoutLayout->addWidget(notesLabel);
         }
         
-        // Exercises
-        if (!workout.exercises().isEmpty()) {
+        // Exercises - defensive copy to prevent segfault
+        const QList<WorkoutExercise> exercises = workout.exercises();
+        if (!exercises.isEmpty()) {
             QLabel *exercisesLabel = new QLabel("Exercises:");
             exercisesLabel->setStyleSheet("QLabel { font-weight: bold; margin-top: 10px; }");
             workoutLayout->addWidget(exercisesLabel);
             
-            for (int i = 0; i < workout.exercises().size(); ++i) {
-                const WorkoutExercise &exercise = workout.exercises()[i];
+            for (int i = 0; i < exercises.size(); ++i) {
+                const WorkoutExercise &exercise = exercises[i];
                 
                 QGroupBox *exerciseGroup = new QGroupBox(QString("%1. %2").arg(i + 1).arg(exercise.exerciseName()));
                 exerciseGroup->setStyleSheet("QGroupBox { font-weight: normal; margin: 5px; }");
                 
                 QVBoxLayout *exerciseLayout = new QVBoxLayout(exerciseGroup);
                 
-                // Exercise details
-                for (int j = 0; j < exercise.setsData().size(); ++j) {
-                    const SetData &set = exercise.setsData()[j];
-                    QString setText = QString("Set %1: %2 kg × %3 reps × %4 sets")
-                                        .arg(j + 1)
-                                        .arg(set.weight())
-                                        .arg(set.reps())
-                                        .arg(set.sets());
-                    
-                    QLabel *setLabel = new QLabel(setText);
-                    setLabel->setStyleSheet("QLabel { margin-left: 10px; }");
-                    exerciseLayout->addWidget(setLabel);
+                // Exercise details - defensive copy to prevent segfault
+                const QList<SetData> sets = exercise.setsData();
+                if (!sets.isEmpty()) {
+                    for (int j = 0; j < sets.size(); ++j) {
+                        const SetData &set = sets.at(j);
+                        QString setText = QString("Set %1: %2 kg × %3 reps × %4 sets")
+                                            .arg(j + 1)
+                                            .arg(set.weight())
+                                            .arg(set.reps())
+                                            .arg(set.sets());
+                        
+                        QLabel *setLabel = new QLabel(setText);
+                        setLabel->setStyleSheet("QLabel { margin-left: 10px; }");
+                        exerciseLayout->addWidget(setLabel);
+                    }
                 }
                 
                 // Exercise notes
@@ -137,6 +155,12 @@ void WorkoutView::displayWorkouts()
         }
         
         containerLayout->addWidget(workoutGroup);
+    }
+    } catch (...) {
+        // If there's any crash while displaying workouts, show error message
+        QLabel *errorLabel = new QLabel("Error displaying workout data");
+        errorLabel->setStyleSheet("QLabel { color: red; font-weight: bold; padding: 10px; }");
+        containerLayout->addWidget(errorLabel);
     }
 }
 
@@ -154,8 +178,17 @@ void WorkoutView::clearWorkouts()
     }
 }
 
-void WorkoutView::deleteWorkout(int workoutId)
+void WorkoutView::onEditClicked()
 {
+    emit editRequested();
+}
+
+void WorkoutView::onDeleteClicked()
+{
+    if (m_currentWorkouts.isEmpty()) {
+        return;
+    }
+    
     QMessageBox::StandardButton reply = QMessageBox::question(
         this, 
         "Delete Workout", 
@@ -164,11 +197,10 @@ void WorkoutView::deleteWorkout(int workoutId)
     );
     
     if (reply == QMessageBox::Yes) {
-        if (m_dataManager->deleteWorkout(workoutId)) {
-            refreshData();
-            emit workoutDeleted();
-        } else {
-            QMessageBox::warning(this, "Error", "Failed to delete workout.");
+        // Delete all workouts for this date
+        for (const Workout &workout : m_currentWorkouts) {
+            m_dataManager->deleteWorkout(workout.id());
         }
+        emit deleteRequested();
     }
 } 

@@ -28,16 +28,20 @@ class WorkoutBuilder : public QWidget
 public:
     explicit WorkoutBuilder(DataManager *dataManager, QWidget *parent = nullptr);
     void setDate(const QDate &date);
+    void loadWorkoutData(const QList<Workout> &workouts);
+    void clearForm();
+    void setEditingWorkoutId(int workoutId);
 
 signals:
     void workoutCreated();
+    void cancelled();
 
 public slots:
     void updateExerciseComboBox();
 
 private slots:
     void saveWorkout();
-    void clearForm();
+    void onCancelClicked();
 
 private:
     void setupUI();
@@ -45,14 +49,16 @@ private:
     bool validateForm();
     void showError(const QString &message);
     void showSuccess(const QString &message);
+    bool eventFilter(QObject *obj, QEvent *event) override;
     
     DataManager *m_dataManager;
     QDate m_currentDate;
+    int m_editingWorkoutId;
     
     // UI elements
     QTextEdit *m_workoutNotesEdit;
     QPushButton *m_saveButton;
-    QPushButton *m_clearButton;
+    QPushButton *m_cancelButton;
     QWidget *m_exercisesContainer;
     
     // Exercise rows

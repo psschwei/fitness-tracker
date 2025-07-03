@@ -31,6 +31,9 @@ JournalContentArea::JournalContentArea(DateManager *dateManager, ::DataManager *
     
     // Connect exercise tracking signals
     connect(m_workoutBuilder, &WorkoutBuilder::workoutCreated, this, &JournalContentArea::onWorkoutCreated);
+    connect(m_workoutBuilder, &WorkoutBuilder::cancelled, this, &JournalContentArea::onWorkoutCancelled);
+    connect(m_workoutView, &WorkoutView::editRequested, this, &JournalContentArea::onWorkoutEditRequested);
+    connect(m_workoutView, &WorkoutView::deleteRequested, this, &JournalContentArea::onWorkoutDeleteRequested);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseAdded, this, &JournalContentArea::onExerciseAdded);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseUpdated, this, &JournalContentArea::onExerciseUpdated);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseDeleted, this, &JournalContentArea::onExerciseDeleted);
@@ -81,11 +84,34 @@ void JournalContentArea::setupUI()
     
     // Create exercise tracking components
     m_workoutBuilder = new WorkoutBuilder(m_dataManager);
+    m_workoutView = new WorkoutView(m_dataManager);
     m_exerciseLibrary = new ExerciseLibrary(m_dataManager);
+    
+    // Create stacked widget for workouts
+    m_workoutStackedWidget = new QStackedWidget();
+
+    // Create empty state widget for workouts
+    m_workoutEmptyStateWidget = new QWidget;
+    QLabel *workoutEmptyLabel = new QLabel("No workout for this date");
+    workoutEmptyLabel->setAlignment(Qt::AlignCenter);
+    workoutEmptyLabel->setStyleSheet("QLabel { font-size: 16px; color: #666; padding: 20px; }");
+    QPushButton *addWorkoutButton = new QPushButton("Add Workout", m_workoutEmptyStateWidget);
+    addWorkoutButton->setStyleSheet("QPushButton { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 14px; }");
+    QVBoxLayout *workoutEmptyLayout = new QVBoxLayout(m_workoutEmptyStateWidget);
+    workoutEmptyLayout->setContentsMargins(240, 40, 240, 40);
+    workoutEmptyLayout->addStretch();
+    workoutEmptyLayout->addWidget(workoutEmptyLabel, 0, Qt::AlignCenter);
+    workoutEmptyLayout->addWidget(addWorkoutButton, 0, Qt::AlignCenter);
+    workoutEmptyLayout->addStretch();
+    connect(addWorkoutButton, &QPushButton::clicked, this, &JournalContentArea::onAddWorkoutClicked);
+
+    m_workoutStackedWidget->addWidget(m_workoutEmptyStateWidget); // Index 0: Empty state
+    m_workoutStackedWidget->addWidget(m_workoutView);      // Index 1: View
+    m_workoutStackedWidget->addWidget(m_workoutBuilder);   // Index 2: Form
     
     // Add tabs
     m_tabWidget->addTab(m_stackedWidget, "Body Composition");
-    m_tabWidget->addTab(m_workoutBuilder, "Workouts");
+    m_tabWidget->addTab(m_workoutStackedWidget, "Workouts");
     m_tabWidget->addTab(m_exerciseLibrary, "Exercise Library");
     
     // Create main layout
@@ -105,11 +131,21 @@ void JournalContentArea::loadDataForCurrentDate()
 {
     QDate currentDate = m_dateManager->currentDate();
     
+    // Load body composition data
     if (m_dataManager->hasBodyComposition(currentDate)) {
         BodyComposition data = m_dataManager->loadBodyComposition(currentDate);
         showBodyCompositionView(data);
     } else {
         showEmptyState();
+    }
+    
+    // Load workout data
+    QList<Workout> workouts = m_dataManager->getWorkoutsByDate(currentDate);
+    m_workoutView->setDate(currentDate);
+    if (workouts.isEmpty()) {
+        m_workoutStackedWidget->setCurrentIndex(0); // Show empty state
+    } else {
+        m_workoutStackedWidget->setCurrentIndex(1); // Show view
     }
 }
 
@@ -189,7 +225,34 @@ void JournalContentArea::onAddNewClicked()
 
 void JournalContentArea::onWorkoutCreated()
 {
-    // Workout created successfully
+    // Refresh workout view and switch to view mode
+    m_workoutView->refreshData();
+    m_workoutStackedWidget->setCurrentIndex(1);
+}
+
+void JournalContentArea::onWorkoutEditRequested()
+{
+    // Switch to workout builder for editing
+    m_workoutBuilder->setDate(m_dateManager->currentDate());
+    
+    // Load existing workout data for editing
+    QList<Workout> workouts = m_dataManager->getWorkoutsByDate(m_dateManager->currentDate());
+    m_workoutBuilder->loadWorkoutData(workouts);
+    
+    m_workoutStackedWidget->setCurrentIndex(2);
+}
+
+void JournalContentArea::onWorkoutDeleteRequested()
+{
+    // Refresh workout view after deletion
+    m_workoutView->refreshData();
+}
+
+void JournalContentArea::onWorkoutCancelled()
+{
+    // Switch back to workout view
+    m_workoutView->refreshData();
+    m_workoutStackedWidget->setCurrentIndex(1);
 }
 
 void JournalContentArea::onExerciseAdded()
@@ -208,6 +271,13 @@ void JournalContentArea::onExerciseDeleted()
 {
     // Refresh workout builder with updated exercises
     m_workoutBuilder->updateExerciseComboBox();
+}
+
+void JournalContentArea::onAddWorkoutClicked()
+{
+    m_workoutBuilder->setDate(m_dateManager->currentDate());
+    m_workoutBuilder->clearForm();
+    m_workoutStackedWidget->setCurrentIndex(2);
 }
 
 void JournalContentArea::setupKeyboardShortcuts()

@@ -11,6 +11,7 @@
 #include "bodycompositionform.h"
 #include "bodycompositionview.h"
 #include "workoutbuilder.h"
+#include "workoutview.h"
 #include "exerciselibrary.h"
 #include "models/datamanager.h"
 
@@ -29,6 +30,9 @@ private slots:
     void onDeleteRequested();
     void onAddNewClicked();
     void onWorkoutCreated();
+    void onWorkoutEditRequested();
+    void onWorkoutDeleteRequested();
+    void onWorkoutCancelled();
     void onExerciseAdded();
     void onExerciseUpdated();
     void onExerciseDeleted();
@@ -36,6 +40,7 @@ private slots:
     void switchToBodyComposition();
     void switchToWorkouts();
     void switchToExerciseLibrary();
+    void onAddWorkoutClicked();
 
 private:
     void setupUI();
@@ -55,7 +60,10 @@ private:
     
     // Exercise tracking components
     QTabWidget *m_tabWidget;
+    QStackedWidget *m_workoutStackedWidget;
+    QWidget *m_workoutEmptyStateWidget;
     WorkoutBuilder *m_workoutBuilder;
+    WorkoutView *m_workoutView;
     ExerciseLibrary *m_exerciseLibrary;
 };
 
