@@ -1,1 +1,0 @@
-# Database models for fitness tracker 
