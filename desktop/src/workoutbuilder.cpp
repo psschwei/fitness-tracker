@@ -1,5 +1,6 @@
 #include "workoutbuilder.h"
 #include <QDebug>
+#include <QMessageBox>
 
 WorkoutBuilder::WorkoutBuilder(DataManager *dataManager, QWidget *parent)
     : QWidget(parent)
@@ -18,13 +19,14 @@ void WorkoutBuilder::setDate(const QDate &date)
 void WorkoutBuilder::setupUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(40, 20, 40, 20);
     
     // Workout notes section
     QGroupBox *notesGroup = new QGroupBox("Workout Notes (Optional)");
     QVBoxLayout *notesLayout = new QVBoxLayout(notesGroup);
     
     m_workoutNotesEdit = new QTextEdit();
-    m_workoutNotesEdit->setMaximumHeight(80);
+    m_workoutNotesEdit->setMaximumHeight(50);
     m_workoutNotesEdit->setPlaceholderText("Add notes about this workout...");
     notesLayout->addWidget(m_workoutNotesEdit);
     
@@ -34,23 +36,17 @@ void WorkoutBuilder::setupUI()
     QGroupBox *exercisesGroup = new QGroupBox("Exercises");
     QVBoxLayout *exercisesLayout = new QVBoxLayout(exercisesGroup);
     
-    // Exercise rows container
-    m_exercisesScrollArea = new QScrollArea();
+    // Create exercises container first
     m_exercisesContainer = new QWidget();
     QVBoxLayout *containerLayout = new QVBoxLayout(m_exercisesContainer);
     containerLayout->setAlignment(Qt::AlignTop);
     
-    m_exercisesScrollArea->setWidget(m_exercisesContainer);
-    m_exercisesScrollArea->setWidgetResizable(true);
-    m_exercisesScrollArea->setMaximumHeight(400);
+    // Create 8 exercise rows
+    for (int i = 0; i < 8; ++i) {
+        addExerciseRow();
+    }
     
-    exercisesLayout->addWidget(m_exercisesScrollArea);
-    
-    // Add exercise button
-    m_addExerciseButton = new QPushButton("+ Add Exercise");
-    m_addExerciseButton->setStyleSheet("QPushButton { padding: 8px; font-weight: bold; }");
-    connect(m_addExerciseButton, &QPushButton::clicked, this, &WorkoutBuilder::addExercise);
-    exercisesLayout->addWidget(m_addExerciseButton);
+    exercisesLayout->addWidget(m_exercisesContainer);
     
     mainLayout->addWidget(exercisesGroup);
     
@@ -65,13 +61,13 @@ void WorkoutBuilder::setupUI()
     m_clearButton->setStyleSheet("QPushButton { padding: 10px; font-weight: bold; background-color: #f44336; color: white; border: none; border-radius: 4px; }");
     connect(m_clearButton, &QPushButton::clicked, this, &WorkoutBuilder::clearForm);
     
-    buttonLayout->addWidget(m_saveButton);
+    buttonLayout->addStretch();
     buttonLayout->addWidget(m_clearButton);
+    buttonLayout->addWidget(m_saveButton);
     
     mainLayout->addLayout(buttonLayout);
     
-    // Add initial exercise row
-    addExerciseRow();
+    setLayout(mainLayout);
 }
 
 void WorkoutBuilder::updateExerciseComboBox()
@@ -81,7 +77,7 @@ void WorkoutBuilder::updateExerciseComboBox()
     // Update all existing combo boxes
     for (ExerciseRow &row : m_exerciseRows) {
         row.exerciseCombo->clear();
-        row.exerciseCombo->addItem("Select Exercise", -1);
+        row.exerciseCombo->addItem("Select an exercise", -1);
         
         for (const Exercise &exercise : m_availableExercises) {
             if (exercise.isActive()) {
@@ -91,116 +87,68 @@ void WorkoutBuilder::updateExerciseComboBox()
     }
 }
 
-void WorkoutBuilder::addExercise()
-{
-    addExerciseRow();
-}
-
-void WorkoutBuilder::removeExercise(int index)
-{
-    removeExerciseRow(index);
-}
-
 void WorkoutBuilder::addExerciseRow()
 {
     ExerciseRow row;
     
     // Exercise selection
     row.exerciseCombo = new QComboBox();
-    row.exerciseCombo->addItem("Select Exercise", -1);
+    row.exerciseCombo->addItem("Select an exercise", -1);
     for (const Exercise &exercise : m_availableExercises) {
         if (exercise.isActive()) {
             row.exerciseCombo->addItem(exercise.name(), exercise.id());
         }
     }
     
-    // Weight input
-    row.weightSpin = new QDoubleSpinBox();
-    row.weightSpin->setRange(0.0, 999.9);
-    row.weightSpin->setSuffix(" kg");
-    row.weightSpin->setDecimals(1);
-    row.weightSpin->setSingleStep(0.5);
+    // Weight input (text input instead of spinner)
+    row.weightEdit = new QLineEdit();
+    row.weightEdit->setPlaceholderText("0.0");
+    row.weightEdit->setValidator(new QDoubleValidator(0.0, 999.9, 1, this));
+    row.weightEdit->setMaximumWidth(60);
+    row.weightEdit->setMinimumWidth(60);
     
-    // Reps input
-    row.repsSpin = new QSpinBox();
-    row.repsSpin->setRange(1, 999);
-    row.repsSpin->setSuffix(" reps");
+    // Reps input (text input instead of spinner)
+    row.repsEdit = new QLineEdit();
+    row.repsEdit->setPlaceholderText("0");
+    row.repsEdit->setValidator(new QIntValidator(0, 999, this));
+    row.repsEdit->setMaximumWidth(50);
+    row.repsEdit->setMinimumWidth(50);
     
-    // Sets input
-    row.setsSpin = new QSpinBox();
-    row.setsSpin->setRange(1, 99);
-    row.setsSpin->setSuffix(" sets");
-    row.setsSpin->setValue(1);
+    // Sets input (text input instead of spinner)
+    row.setsEdit = new QLineEdit();
+    row.setsEdit->setPlaceholderText("1");
+    row.setsEdit->setValidator(new QIntValidator(1, 99, this));
+    row.setsEdit->setText("1");
+    row.setsEdit->setMaximumWidth(50);
+    row.setsEdit->setMinimumWidth(50);
     
     // Notes input
     row.notesEdit = new QTextEdit();
-    row.notesEdit->setMaximumHeight(60);
-    row.notesEdit->setPlaceholderText("Exercise notes...");
+    row.notesEdit->setMaximumHeight(40);
+    row.notesEdit->setPlaceholderText("Notes...");
     
-    // Remove button
-    row.removeButton = new QPushButton("Remove");
-    row.removeButton->setStyleSheet("QPushButton { background-color: #f44336; color: white; border: none; border-radius: 4px; padding: 4px 8px; }");
-    
-    // Connect remove button
-    int rowIndex = m_exerciseRows.size();
-    connect(row.removeButton, &QPushButton::clicked, [this, rowIndex]() {
-        removeExercise(rowIndex);
-    });
-    
-    // Create layout for this row
-    QGroupBox *exerciseGroup = new QGroupBox(QString("Exercise %1").arg(rowIndex + 1));
-    QGridLayout *exerciseLayout = new QGridLayout(exerciseGroup);
+    // Create layout for this row (no group box title)
+    QWidget *exerciseWidget = new QWidget();
+    QGridLayout *exerciseLayout = new QGridLayout(exerciseWidget);
+    exerciseLayout->setContentsMargins(10, 5, 10, 5);
     
     exerciseLayout->addWidget(new QLabel("Exercise:"), 0, 0);
     exerciseLayout->addWidget(row.exerciseCombo, 0, 1);
     exerciseLayout->addWidget(new QLabel("Weight:"), 0, 2);
-    exerciseLayout->addWidget(row.weightSpin, 0, 3);
+    exerciseLayout->addWidget(row.weightEdit, 0, 3);
     exerciseLayout->addWidget(new QLabel("Reps:"), 0, 4);
-    exerciseLayout->addWidget(row.repsSpin, 0, 5);
+    exerciseLayout->addWidget(row.repsEdit, 0, 5);
     exerciseLayout->addWidget(new QLabel("Sets:"), 0, 6);
-    exerciseLayout->addWidget(row.setsSpin, 0, 7);
-    exerciseLayout->addWidget(row.removeButton, 0, 8);
+    exerciseLayout->addWidget(row.setsEdit, 0, 7);
     
     exerciseLayout->addWidget(new QLabel("Notes:"), 1, 0);
-    exerciseLayout->addWidget(row.notesEdit, 1, 1, 1, 8);
+    exerciseLayout->addWidget(row.notesEdit, 1, 1, 1, 7);
     
     // Add to container
     QVBoxLayout *containerLayout = qobject_cast<QVBoxLayout*>(m_exercisesContainer->layout());
-    containerLayout->addWidget(exerciseGroup);
+    containerLayout->addWidget(exerciseWidget);
     
     m_exerciseRows.append(row);
-}
-
-void WorkoutBuilder::removeExerciseRow(int index)
-{
-    if (index >= 0 && index < m_exerciseRows.size()) {
-        // Remove the widget from the container
-        QVBoxLayout *containerLayout = qobject_cast<QVBoxLayout*>(m_exercisesContainer->layout());
-        if (containerLayout && index < containerLayout->count()) {
-            QLayoutItem *item = containerLayout->takeAt(index);
-            if (item->widget()) {
-                item->widget()->deleteLater();
-            }
-            delete item;
-        }
-        
-        // Remove from our list
-        m_exerciseRows.removeAt(index);
-        
-        // Update group box titles
-        for (int i = 0; i < m_exerciseRows.size(); ++i) {
-            QVBoxLayout *containerLayout = qobject_cast<QVBoxLayout*>(m_exercisesContainer->layout());
-            if (containerLayout && i < containerLayout->count()) {
-                QLayoutItem *item = containerLayout->itemAt(i);
-                if (item && item->widget()) {
-                    QGroupBox *groupBox = qobject_cast<QGroupBox*>(item->widget());
-                    if (groupBox) {
-                        groupBox->setTitle(QString("Exercise %1").arg(i + 1));
-                    }
-                }
-            }
-        }
-    }
 }
 
 void WorkoutBuilder::saveWorkout()
@@ -212,7 +160,7 @@ void WorkoutBuilder::saveWorkout()
     // Create workout
     Workout workout(0, m_currentDate, m_workoutNotesEdit->toPlainText().trimmed());
     
-    // Add exercises
+    // Add exercises (only those with selected exercise names)
     for (const ExerciseRow &row : m_exerciseRows) {
         int exerciseId = row.exerciseCombo->currentData().toInt();
         if (exerciseId > 0) {
@@ -225,9 +173,14 @@ void WorkoutBuilder::saveWorkout()
                 }
             }
             
+            // Get values from text inputs
+            double weight = row.weightEdit->text().toDouble();
+            int reps = row.repsEdit->text().toInt();
+            int sets = row.setsEdit->text().toInt();
+            
             // Create sets data
             QList<SetData> setsData;
-            SetData set(row.weightSpin->value(), row.repsSpin->value(), row.setsSpin->value());
+            SetData set(weight, reps, sets);
             setsData.append(set);
             
             // Create workout exercise
@@ -250,18 +203,12 @@ void WorkoutBuilder::clearForm()
 {
     m_workoutNotesEdit->clear();
     
-    // Remove all exercise rows except the first one
-    while (m_exerciseRows.size() > 1) {
-        removeExerciseRow(m_exerciseRows.size() - 1);
-    }
-    
-    // Clear the first row
-    if (!m_exerciseRows.isEmpty()) {
-        ExerciseRow &row = m_exerciseRows[0];
+    // Clear all exercise rows
+    for (ExerciseRow &row : m_exerciseRows) {
         row.exerciseCombo->setCurrentIndex(0);
-        row.weightSpin->setValue(0.0);
-        row.repsSpin->setValue(1);
-        row.setsSpin->setValue(1);
+        row.weightEdit->clear();
+        row.repsEdit->clear();
+        row.setsEdit->setText("1");
         row.notesEdit->clear();
     }
 }
@@ -278,28 +225,46 @@ bool WorkoutBuilder::validateForm()
     }
     
     if (!hasValidExercise) {
-        showError("Please add at least one exercise to the workout.");
+        showError("Please select at least one exercise for the workout.");
         return false;
     }
     
-    // Validate each exercise row
+    // Validate each exercise row that has an exercise selected
     for (int i = 0; i < m_exerciseRows.size(); ++i) {
         const ExerciseRow &row = m_exerciseRows[i];
         int exerciseId = row.exerciseCombo->currentData().toInt();
         
         if (exerciseId > 0) {
             // Exercise is selected, validate the data
-            if (row.weightSpin->value() < 0) {
+            if (row.weightEdit->text().isEmpty()) {
+                showError(QString("Exercise %1: Please enter weight.").arg(i + 1));
+                return false;
+            }
+            
+            double weight = row.weightEdit->text().toDouble();
+            if (weight < 0) {
                 showError(QString("Exercise %1: Weight cannot be negative.").arg(i + 1));
                 return false;
             }
             
-            if (row.repsSpin->value() <= 0) {
+            if (row.repsEdit->text().isEmpty()) {
+                showError(QString("Exercise %1: Please enter reps.").arg(i + 1));
+                return false;
+            }
+            
+            int reps = row.repsEdit->text().toInt();
+            if (reps <= 0) {
                 showError(QString("Exercise %1: Reps must be greater than 0.").arg(i + 1));
                 return false;
             }
             
-            if (row.setsSpin->value() <= 0) {
+            if (row.setsEdit->text().isEmpty()) {
+                showError(QString("Exercise %1: Please enter sets.").arg(i + 1));
+                return false;
+            }
+            
+            int sets = row.setsEdit->text().toInt();
+            if (sets <= 0) {
                 showError(QString("Exercise %1: Sets must be greater than 0.").arg(i + 1));
                 return false;
             }

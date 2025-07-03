@@ -9,14 +9,13 @@
 #include <QLineEdit>
 #include <QTextEdit>
 #include <QPushButton>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QComboBox>
-#include <QScrollArea>
 #include <QGroupBox>
 #include <QMessageBox>
 #include <QDate>
 #include <QList>
+#include <QDoubleValidator>
+#include <QIntValidator>
 #include "models/datamanager.h"
 #include "models/exercise.h"
 #include "models/workout.h"
@@ -37,15 +36,12 @@ public slots:
     void updateExerciseComboBox();
 
 private slots:
-    void addExercise();
-    void removeExercise(int index);
     void saveWorkout();
     void clearForm();
 
 private:
     void setupUI();
     void addExerciseRow();
-    void removeExerciseRow(int index);
     bool validateForm();
     void showError(const QString &message);
     void showSuccess(const QString &message);
@@ -55,20 +51,17 @@ private:
     
     // UI elements
     QTextEdit *m_workoutNotesEdit;
-    QPushButton *m_addExerciseButton;
     QPushButton *m_saveButton;
     QPushButton *m_clearButton;
-    QScrollArea *m_exercisesScrollArea;
     QWidget *m_exercisesContainer;
     
     // Exercise rows
     struct ExerciseRow {
         QComboBox *exerciseCombo;
-        QDoubleSpinBox *weightSpin;
-        QSpinBox *repsSpin;
-        QSpinBox *setsSpin;
+        QLineEdit *weightEdit;
+        QLineEdit *repsEdit;
+        QLineEdit *setsEdit;
         QTextEdit *notesEdit;
-        QPushButton *removeButton;
     };
     
     QList<ExerciseRow> m_exerciseRows;

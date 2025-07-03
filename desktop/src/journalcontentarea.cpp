@@ -29,7 +29,6 @@ JournalContentArea::JournalContentArea(DateManager *dateManager, ::DataManager *
     
     // Connect exercise tracking signals
     connect(m_workoutBuilder, &WorkoutBuilder::workoutCreated, this, &JournalContentArea::onWorkoutCreated);
-    connect(m_workoutView, &WorkoutView::workoutDeleted, this, &JournalContentArea::onWorkoutDeleted);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseAdded, this, &JournalContentArea::onExerciseAdded);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseUpdated, this, &JournalContentArea::onExerciseUpdated);
     connect(m_exerciseLibrary, &ExerciseLibrary::exerciseDeleted, this, &JournalContentArea::onExerciseDeleted);
@@ -77,13 +76,11 @@ void JournalContentArea::setupUI()
     
     // Create exercise tracking components
     m_workoutBuilder = new WorkoutBuilder(m_dataManager);
-    m_workoutView = new WorkoutView(m_dataManager);
     m_exerciseLibrary = new ExerciseLibrary(m_dataManager);
     
     // Add tabs
     m_tabWidget->addTab(m_stackedWidget, "Body Composition");
-    m_tabWidget->addTab(m_workoutBuilder, "Workout Builder");
-    m_tabWidget->addTab(m_workoutView, "Workout History");
+    m_tabWidget->addTab(m_workoutBuilder, "Workouts");
     m_tabWidget->addTab(m_exerciseLibrary, "Exercise Library");
     
     // Create main layout
@@ -187,14 +184,7 @@ void JournalContentArea::onAddNewClicked()
 
 void JournalContentArea::onWorkoutCreated()
 {
-    // Refresh workout view
-    m_workoutView->refreshData();
-}
-
-void JournalContentArea::onWorkoutDeleted()
-{
-    // Refresh workout builder
-    m_workoutBuilder->updateExerciseComboBox();
+    // Workout created successfully
 }
 
 void JournalContentArea::onExerciseAdded()

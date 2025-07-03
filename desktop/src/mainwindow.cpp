@@ -20,8 +20,8 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Set window properties
     setWindowTitle("Fitness Tracker");
-    setMinimumSize(600, 400);
-    resize(800, 600);
+    setMinimumSize(600, 600);
+    resize(800, 1000);
 
     // Add left/right arrow shortcuts for day navigation
     QShortcut *leftShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
