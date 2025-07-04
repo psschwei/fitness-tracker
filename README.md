@@ -47,13 +47,13 @@ A Qt6-based desktop application for fitness tracking, built from the ground up f
 - **Workout Viewing**: Clean display of saved workouts with exercise details
 - **Edit & Delete**: Full CRUD operations for workout entries
 - **Date-based Storage**: Workouts are stored by date
-- **Keyboard Shortcuts**: Tab navigation and Enter/Escape shortcuts
+- **Keyboard Shortcuts**: Tab navigation and Ctrl+S/Escape shortcuts
 
 ### ✅ Modern UI with Tabbed Interface
 - **Tabbed Navigation**: Body Composition, Workouts, Exercise Library tabs
 - **Keyboard Shortcuts**: Quick navigation between tabs (b, w, l keys)
 - **Action Shortcuts**: Edit (e), Delete (d), Add (a) shortcuts
-- **Navigation Shortcuts**: Previous/Next day shortcuts
+- **Navigation Shortcuts**: Today (t), Previous (p), Next (n) day shortcuts
 - **Clean Design**: Modern, responsive interface with proper spacing
 - **Empty States**: Helpful empty state displays with action buttons
 

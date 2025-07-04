@@ -31,7 +31,7 @@ BodyCompositionForm::BodyCompositionForm(QWidget *parent)
     connect(m_cancelButton, &QPushButton::clicked, this, &BodyCompositionForm::onCancelClicked);
     
     // Setup keyboard shortcuts
-    QShortcut *saveShortcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    QShortcut *saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
     connect(saveShortcut, &QShortcut::activated, this, &BodyCompositionForm::onSaveClicked);
     
     QShortcut *cancelShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);

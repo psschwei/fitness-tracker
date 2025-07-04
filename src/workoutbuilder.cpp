@@ -71,7 +71,7 @@ void WorkoutBuilder::setupUI()
     connect(m_cancelButton, &QPushButton::clicked, this, &WorkoutBuilder::onCancelClicked);
     
     // Setup keyboard shortcuts
-    QShortcut *saveShortcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    QShortcut *saveShortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
     connect(saveShortcut, &QShortcut::activated, this, &WorkoutBuilder::saveWorkout);
     
     QShortcut *cancelShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);

@@ -308,6 +308,10 @@ void JournalContentArea::setupKeyboardShortcuts()
     connect(addShortcut, &QShortcut::activated, this, &JournalContentArea::onAddShortcut);
     
     // Navigation shortcuts
+    // Today - 't' key
+    QShortcut *todayShortcut = new QShortcut(QKeySequence("t"), this);
+    connect(todayShortcut, &QShortcut::activated, this, &JournalContentArea::onTodayShortcut);
+    
     // Next day - 'n' key
     QShortcut *nextDayShortcut = new QShortcut(QKeySequence("n"), this);
     connect(nextDayShortcut, &QShortcut::activated, this, &JournalContentArea::onNextDayShortcut);
@@ -386,6 +390,11 @@ void JournalContentArea::onAddShortcut()
 void JournalContentArea::onNextDayShortcut()
 {
     m_dateManager->goToNext();
+}
+
+void JournalContentArea::onTodayShortcut()
+{
+    m_dateManager->goToToday();
 }
 
 void JournalContentArea::onPrevDayShortcut()

@@ -44,6 +44,7 @@ private slots:
     void onEditShortcut();
     void onDeleteShortcut();
     void onAddShortcut();
+    void onTodayShortcut();
     void onNextDayShortcut();
     void onPrevDayShortcut();
 
