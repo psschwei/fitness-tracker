@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(fitness-tracker-desktop VERSION 0.1.0 LANGUAGES CXX)
+project(fitness-tracker VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -51,12 +51,12 @@ set(HEADERS
 )
 
 # Create executable
-add_executable(fitness-tracker-desktop ${SOURCES} ${HEADERS})
+add_executable(fitness-tracker ${SOURCES} ${HEADERS})
 
 # Link Qt libraries
-target_link_libraries(fitness-tracker-desktop Qt6::Core Qt6::Widgets)
+target_link_libraries(fitness-tracker Qt6::Core Qt6::Widgets)
 
 # Set output directory
-set_target_properties(fitness-tracker-desktop PROPERTIES
+set_target_properties(fitness-tracker PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 ) 
