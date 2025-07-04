@@ -231,8 +231,10 @@ void WorkoutBuilder::loadWorkoutData(const QList<Workout> &workouts)
     m_workoutNotesEdit->setPlainText(workout.notes());
     
     // Load exercises into the form
-    for (int i = 0; i < workout.exercises().size() && i < m_exerciseRows.size(); ++i) {
-        const WorkoutExercise &exercise = workout.exercises()[i];
+    QList<WorkoutExercise> exercises = workout.exercises();
+    
+    for (int i = 0; i < exercises.size() && i < m_exerciseRows.size(); ++i) {
+        const WorkoutExercise &exercise = exercises[i];
         ExerciseRow &row = m_exerciseRows[i];
         
         // Set exercise name
@@ -244,12 +246,9 @@ void WorkoutBuilder::loadWorkoutData(const QList<Workout> &workouts)
         }
         
         // Set exercise data (use first set for now)
-        if (!exercise.setsData().isEmpty()) {
-            const SetData &set = exercise.setsData().first();
-            qDebug() << "Loading exercise:" << exercise.exerciseName() 
-                     << "Weight:" << set.weight() 
-                     << "Reps:" << set.reps() 
-                     << "Sets:" << set.sets();
+        QList<SetData> sets = exercise.setsData();
+        if (!sets.isEmpty()) {
+            const SetData &set = sets.first();
             row.weightEdit->setText(QString::number(set.weight(), 'f', 1));
             row.repsEdit->setText(QString::number(set.reps()));
             row.setsEdit->setText(QString::number(set.sets()));
