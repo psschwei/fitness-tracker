@@ -59,4 +59,22 @@ target_link_libraries(fitness-tracker Qt6::Core Qt6::Widgets)
 # Set output directory
 set_target_properties(fitness-tracker PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+# Release-specific optimizations
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Enable link-time optimization
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    
+    # Strip debug symbols for smaller executable
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+    
+    # Additional release flags
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+endif()
+
+# Set application properties
+set_target_properties(fitness-tracker PROPERTIES
+    OUTPUT_NAME "fitness-tracker"
+    VERSION ${PROJECT_VERSION}
 ) 

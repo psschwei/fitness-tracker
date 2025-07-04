@@ -116,7 +116,7 @@ Calculations (BMI & Body Fat) ←→ Real-time updates
 
 ### Run
 ```bash
-./build/bin/fitness-tracker-desktop
+./build/bin/fitness-tracker
 ```
 
 ## Project Structure

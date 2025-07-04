@@ -10,10 +10,16 @@ echo "Building Fitness Tracker Desktop App..."
 mkdir -p build
 cd build
 
-# Configure with CMake
-cmake ..
+# Configure with CMake (Debug build by default)
+echo "Configuring for Debug build..."
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 # Build
+echo "Compiling..."
 make -j$(nproc)
 
-echo "Build complete! Executable is in build/bin/fitness-tracker-desktop" 
+cd ..
+
+echo "Build complete! Executable is in build/bin/fitness-tracker"
+echo ""
+echo "For release builds, use: ./release.sh" 
