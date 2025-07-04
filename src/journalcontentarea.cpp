@@ -290,9 +290,31 @@ void JournalContentArea::setupKeyboardShortcuts()
     QShortcut *workoutsShortcut = new QShortcut(QKeySequence("w"), this);
     connect(workoutsShortcut, &QShortcut::activated, this, &JournalContentArea::switchToWorkouts);
     
-    // Exercise Library tab - 'e' key
-    QShortcut *exerciseLibraryShortcut = new QShortcut(QKeySequence("e"), this);
+    // Exercise Library tab - 'l' key
+    QShortcut *exerciseLibraryShortcut = new QShortcut(QKeySequence("l"), this);
     connect(exerciseLibraryShortcut, &QShortcut::activated, this, &JournalContentArea::switchToExerciseLibrary);
+    
+    // Action shortcuts
+    // Edit - 'e' key
+    QShortcut *editShortcut = new QShortcut(QKeySequence("e"), this);
+    connect(editShortcut, &QShortcut::activated, this, &JournalContentArea::onEditShortcut);
+    
+    // Delete - 'd' key
+    QShortcut *deleteShortcut = new QShortcut(QKeySequence("d"), this);
+    connect(deleteShortcut, &QShortcut::activated, this, &JournalContentArea::onDeleteShortcut);
+    
+    // Add - 'a' key
+    QShortcut *addShortcut = new QShortcut(QKeySequence("a"), this);
+    connect(addShortcut, &QShortcut::activated, this, &JournalContentArea::onAddShortcut);
+    
+    // Navigation shortcuts
+    // Next day - 'n' key
+    QShortcut *nextDayShortcut = new QShortcut(QKeySequence("n"), this);
+    connect(nextDayShortcut, &QShortcut::activated, this, &JournalContentArea::onNextDayShortcut);
+    
+    // Previous day - 'p' key
+    QShortcut *prevDayShortcut = new QShortcut(QKeySequence("p"), this);
+    connect(prevDayShortcut, &QShortcut::activated, this, &JournalContentArea::onPrevDayShortcut);
 }
 
 void JournalContentArea::switchToBodyComposition()
@@ -308,4 +330,65 @@ void JournalContentArea::switchToWorkouts()
 void JournalContentArea::switchToExerciseLibrary()
 {
     m_tabWidget->setCurrentIndex(2);
+}
+
+void JournalContentArea::onEditShortcut()
+{
+    int currentTab = m_tabWidget->currentIndex();
+    
+    if (currentTab == 0) { // Body Composition tab
+        // Check if we're in view mode (not form mode)
+        if (m_stackedWidget->currentIndex() == 2) { // View mode
+            onEditRequested();
+        }
+    } else if (currentTab == 1) { // Workouts tab
+        // Check if we're in view mode (not builder mode)
+        if (m_workoutStackedWidget->currentIndex() == 1) { // View mode
+            onWorkoutEditRequested();
+        }
+    }
+}
+
+void JournalContentArea::onDeleteShortcut()
+{
+    int currentTab = m_tabWidget->currentIndex();
+    
+    if (currentTab == 0) { // Body Composition tab
+        // Check if we're in view mode (not form mode)
+        if (m_stackedWidget->currentIndex() == 2) { // View mode
+            onDeleteRequested();
+        }
+    } else if (currentTab == 1) { // Workouts tab
+        // Check if we're in view mode (not builder mode)
+        if (m_workoutStackedWidget->currentIndex() == 1) { // View mode
+            onWorkoutDeleteRequested();
+        }
+    }
+}
+
+void JournalContentArea::onAddShortcut()
+{
+    int currentTab = m_tabWidget->currentIndex();
+    
+    if (currentTab == 0) { // Body Composition tab
+        // Check if we're in empty state
+        if (m_stackedWidget->currentIndex() == 0) { // Empty state
+            onAddNewClicked();
+        }
+    } else if (currentTab == 1) { // Workouts tab
+        // Check if we're in empty state
+        if (m_workoutStackedWidget->currentIndex() == 0) { // Empty state
+            onAddWorkoutClicked();
+        }
+    }
+}
+
+void JournalContentArea::onNextDayShortcut()
+{
+    m_dateManager->goToNext();
+}
+
+void JournalContentArea::onPrevDayShortcut()
+{
+    m_dateManager->goToPrevious();
 } 

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QShortcut>
 
 WorkoutBuilder::WorkoutBuilder(DataManager *dataManager, QWidget *parent)
     : QWidget(parent)
@@ -68,6 +69,13 @@ void WorkoutBuilder::setupUI()
     m_cancelButton = new QPushButton("Cancel");
     m_cancelButton->setStyleSheet("QPushButton { background-color: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; }");
     connect(m_cancelButton, &QPushButton::clicked, this, &WorkoutBuilder::onCancelClicked);
+    
+    // Setup keyboard shortcuts
+    QShortcut *saveShortcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    connect(saveShortcut, &QShortcut::activated, this, &WorkoutBuilder::saveWorkout);
+    
+    QShortcut *cancelShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+    connect(cancelShortcut, &QShortcut::activated, this, &WorkoutBuilder::onCancelClicked);
     
     buttonLayout->addStretch();
     buttonLayout->addWidget(m_cancelButton);

@@ -5,6 +5,7 @@
 #include <QGroupBox>
 #include <QDoubleValidator>
 #include <QMessageBox>
+#include <QShortcut>
 #include "utils/calculations.h"
 
 BodyCompositionForm::BodyCompositionForm(QWidget *parent)
@@ -28,6 +29,13 @@ BodyCompositionForm::BodyCompositionForm(QWidget *parent)
     // Connect button signals
     connect(m_saveButton, &QPushButton::clicked, this, &BodyCompositionForm::onSaveClicked);
     connect(m_cancelButton, &QPushButton::clicked, this, &BodyCompositionForm::onCancelClicked);
+    
+    // Setup keyboard shortcuts
+    QShortcut *saveShortcut = new QShortcut(QKeySequence(Qt::Key_Return), this);
+    connect(saveShortcut, &QShortcut::activated, this, &BodyCompositionForm::onSaveClicked);
+    
+    QShortcut *cancelShortcut = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+    connect(cancelShortcut, &QShortcut::activated, this, &BodyCompositionForm::onCancelClicked);
 }
 
 void BodyCompositionForm::setupUI()

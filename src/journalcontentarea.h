@@ -41,6 +41,11 @@ private slots:
     void switchToWorkouts();
     void switchToExerciseLibrary();
     void onAddWorkoutClicked();
+    void onEditShortcut();
+    void onDeleteShortcut();
+    void onAddShortcut();
+    void onNextDayShortcut();
+    void onPrevDayShortcut();
 
 private:
     void setupUI();
