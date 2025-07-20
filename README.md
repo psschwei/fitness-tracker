@@ -119,6 +119,70 @@ Calculations (BMI & Body Fat) ←→ Real-time updates
 ./build/bin/fitness-tracker
 ```
 
+## GitHub Actions and Releases
+
+### Automated Builds
+This repository uses GitHub Actions for continuous integration and automated releases:
+
+- **Build and Test** (`.github/workflows/build.yml`): Runs on every push to `main`/`develop` and pull requests
+  - Builds both Debug and Release versions
+  - Uploads build artifacts for download
+  - Ensures code compiles correctly before merging
+
+- **Release** (`.github/workflows/release.yml`): Automatically creates releases when tags are pushed
+  - Triggers on tags matching pattern `v*` (e.g., `v1.0.0`, `v2.1.3`)
+  - Builds optimized release version
+  - Creates Linux tarball with installation scripts
+  - Publishes GitHub release with download links
+  - Uploads build artifacts
+
+### Creating a Release
+
+#### Option 1: Using the Release Script (Recommended)
+```bash
+# Interactive mode - prompts for version
+./scripts/create-release.sh
+
+# Or specify version directly
+./scripts/create-release.sh 1.0.0
+```
+
+#### Option 2: Manual Process
+1. **Update Version**: Edit `CMakeLists.txt` to update the version number
+2. **Create Tag**: Create and push a new tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+3. **Automatic Release**: GitHub Actions will automatically:
+   - Build the application
+   - Create a release package
+   - Publish a GitHub release with download links
+   - Upload build artifacts
+
+### Release Package Contents
+Each release includes:
+- `fitness-tracker` - Main executable
+- `install.sh` - Installation script
+- `uninstall.sh` - Uninstallation script
+- `run.sh` - Test run script
+- `README.md` - Documentation
+- `LICENSE` - License file
+- `fitness-tracker.desktop` - Desktop integration
+
+### Installation from Release
+```bash
+# Download and extract the release
+tar -xzf fitness-tracker-1.0.0.tar.gz
+cd fitness-tracker-1.0.0
+
+# Install system-wide (requires sudo)
+sudo ./install.sh
+
+# Or install for current user only
+./install.sh
+```
+
 ## Project Structure
 ```
 src/

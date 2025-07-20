@@ -1,0 +1,74 @@
+name: Test Local Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Qt6 dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt6-base-dev qt6-tools-dev
+        
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.26.0'
+        
+    - name: Test version update
+      run: |
+        # Test the version update functionality
+        VERSION=${{ github.event.inputs.version }}
+        sed -i "s/project(fitness-tracker VERSION [0-9.]*)/project(fitness-tracker VERSION $VERSION)/" CMakeLists.txt
+        echo "Updated version to $VERSION"
+        
+    - name: Build application
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG" ..
+        make -j$(nproc)
+        cd ..
+        
+    - name: Test release package creation
+      run: |
+        VERSION=${{ github.event.inputs.version }}
+        RELEASE_NAME="fitness-tracker-${VERSION}"
+        RELEASE_DIR="release/${RELEASE_NAME}"
+        
+        # Create release directory
+        mkdir -p "$RELEASE_DIR"
+        
+        # Copy executable
+        cp build/bin/fitness-tracker "$RELEASE_DIR/"
+        
+        # Copy documentation
+        cp README.md "$RELEASE_DIR/"
+        cp LICENSE "$RELEASE_DIR/"
+        
+        # Create tarball
+        cd release
+        tar -czf "${RELEASE_NAME}.tar.gz" "$RELEASE_NAME"
+        cd ..
+        
+        echo "Created test release package: release/fitness-tracker-${VERSION}.tar.gz"
+        
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-build-${{ github.event.inputs.version }}
+        path: |
+          build/bin/fitness-tracker
+          release/fitness-tracker-${{ github.event.inputs.version }}.tar.gz
+        retention-days: 1 

@@ -1,0 +1,57 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Qt6 dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt6-base-dev qt6-tools-dev
+        
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.26.0'
+        
+    - name: Build Debug version
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Debug ..
+        make -j$(nproc)
+        cd ..
+        
+    - name: Build Release version
+      run: |
+        mkdir -p build-release
+        cd build-release
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG" ..
+        make -j$(nproc)
+        cd ..
+        
+    - name: Check executable size
+      run: |
+        echo "Debug build size:"
+        ls -lh build/bin/fitness-tracker
+        echo "Release build size:"
+        ls -lh build-release/bin/fitness-tracker
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          build/bin/fitness-tracker
+          build-release/bin/fitness-tracker
+        retention-days: 7 
