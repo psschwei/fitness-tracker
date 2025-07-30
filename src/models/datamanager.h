@@ -23,6 +23,12 @@ public:
     void deleteBodyComposition(const QDate &date);
     QList<QDate> getBodyCompositionDates() const;
     
+    // Analytics data aggregation methods
+    QList<BodyComposition> getBodyCompositionRange(const QDate &start, const QDate &end) const;
+    QList<BodyComposition> getAllBodyCompositionSorted() const;
+    QPair<double, double> getWeightRange() const;
+    QPair<QDate, QDate> getDataDateRange() const;
+    
     // Exercise library management
     bool saveExercise(const Exercise &exercise);
     Exercise loadExercise(int id);

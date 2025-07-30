@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Qt6
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Charts)
 
 # Set up Qt MOC
 set(CMAKE_AUTOMOC ON)
@@ -24,6 +24,7 @@ set(SOURCES
     src/workoutbuilder.cpp
     src/workoutview.cpp
     src/exerciselibrary.cpp
+    src/analyticstab.cpp
     src/models/bodycomposition.cpp
     src/models/datamanager.cpp
     src/models/exercise.cpp
@@ -42,6 +43,7 @@ set(HEADERS
     src/workoutbuilder.h
     src/workoutview.h
     src/exerciselibrary.h
+    src/analyticstab.h
     src/models/bodycomposition.h
     src/models/datamanager.h
     src/models/exercise.h
@@ -54,7 +56,7 @@ set(HEADERS
 add_executable(fitness-tracker ${SOURCES} ${HEADERS})
 
 # Link Qt libraries
-target_link_libraries(fitness-tracker Qt6::Core Qt6::Widgets)
+target_link_libraries(fitness-tracker Qt6::Core Qt6::Widgets Qt6::Charts)
 
 # Set output directory
 set_target_properties(fitness-tracker PROPERTIES

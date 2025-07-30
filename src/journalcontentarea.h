@@ -13,6 +13,7 @@
 #include "workoutbuilder.h"
 #include "workoutview.h"
 #include "exerciselibrary.h"
+#include "analyticstab.h"
 #include "models/datamanager.h"
 
 class JournalContentArea : public QWidget
@@ -40,6 +41,7 @@ private slots:
     void switchToBodyComposition();
     void switchToWorkouts();
     void switchToExerciseLibrary();
+    void switchToVisualizations();
     void onAddWorkoutClicked();
     void onEditShortcut();
     void onDeleteShortcut();
@@ -71,6 +73,7 @@ private:
     WorkoutBuilder *m_workoutBuilder;
     WorkoutView *m_workoutView;
     ExerciseLibrary *m_exerciseLibrary;
+    AnalyticsTab *m_analyticsTab;
 };
 
 #endif // JOURNALCONTENTAREA_H 

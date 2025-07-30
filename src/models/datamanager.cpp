@@ -6,11 +6,15 @@
 #include <QJsonArray>
 #include <QStandardPaths>
 #include <QDebug>
+#include <algorithm>
+#include <limits>
+#include <cstdio>
 
 DataManager::DataManager(QObject *parent)
     : QObject(parent)
 {
     m_dataFilePath = getDataFilePath();
+    printf("DataManager: Looking for data file at: %s\n", m_dataFilePath.toLocal8Bit().data());
     ensureDataDirectory();
     loadData();
 }
@@ -48,10 +52,80 @@ QList<QDate> DataManager::getBodyCompositionDates() const
     return m_bodyCompositionData.keys();
 }
 
+QList<BodyComposition> DataManager::getBodyCompositionRange(const QDate &start, const QDate &end) const
+{
+    QList<BodyComposition> result;
+    for (auto it = m_bodyCompositionData.constBegin(); it != m_bodyCompositionData.constEnd(); ++it) {
+        const QDate &date = it.key();
+        if (date >= start && date <= end) {
+            result.append(it.value());
+        }
+    }
+    
+    // Sort by date
+    std::sort(result.begin(), result.end(), [](const BodyComposition &a, const BodyComposition &b) {
+        return a.date() < b.date();
+    });
+    
+    return result;
+}
+
+QList<BodyComposition> DataManager::getAllBodyCompositionSorted() const
+{
+    QList<BodyComposition> result = m_bodyCompositionData.values();
+    
+    // Sort by date
+    std::sort(result.begin(), result.end(), [](const BodyComposition &a, const BodyComposition &b) {
+        return a.date() < b.date();
+    });
+    
+    return result;
+}
+
+QPair<double, double> DataManager::getWeightRange() const
+{
+    if (m_bodyCompositionData.isEmpty()) {
+        return QPair<double, double>(0.0, 0.0);
+    }
+    
+    double minWeight = std::numeric_limits<double>::max();
+    double maxWeight = std::numeric_limits<double>::lowest();
+    
+    for (const BodyComposition &composition : m_bodyCompositionData.values()) {
+        double weight = composition.weight();
+        if (weight > 0) { // Only consider valid weights
+            minWeight = qMin(minWeight, weight);
+            maxWeight = qMax(maxWeight, weight);
+        }
+    }
+    
+    // If no valid weights found, return 0,0
+    if (minWeight == std::numeric_limits<double>::max()) {
+        return QPair<double, double>(0.0, 0.0);
+    }
+    
+    return QPair<double, double>(minWeight, maxWeight);
+}
+
+QPair<QDate, QDate> DataManager::getDataDateRange() const
+{
+    if (m_bodyCompositionData.isEmpty()) {
+        return QPair<QDate, QDate>(QDate(), QDate());
+    }
+    
+    QList<QDate> dates = m_bodyCompositionData.keys();
+    std::sort(dates.begin(), dates.end());
+    
+    return QPair<QDate, QDate>(dates.first(), dates.last());
+}
+
 bool DataManager::loadData()
 {
     QFile file(m_dataFilePath);
+    qDebug() << "DataManager::loadData: Checking file:" << m_dataFilePath;
+    qDebug() << "DataManager::loadData: File exists:" << file.exists();
     if (!file.exists()) {
+        qDebug() << "DataManager::loadData: No data file found, that's okay";
         return true; // No data file yet, that's okay
     }
     
@@ -71,14 +145,20 @@ bool DataManager::loadData()
     if (root.contains("bodyComposition")) {
         QJsonArray array = root["bodyComposition"].toArray();
         m_bodyCompositionData.clear();
+        qDebug() << "DataManager::loadData: Found" << array.size() << "body composition entries in JSON";
         
         for (const QJsonValue &value : array) {
             QJsonObject obj = value.toObject();
             BodyComposition composition = BodyComposition::fromJson(obj);
             if (composition.date().isValid()) {
                 m_bodyCompositionData[composition.date()] = composition;
+                qDebug() << "  Loaded entry for date:" << composition.date().toString() 
+                         << "Weight:" << composition.weight() << "BMI:" << composition.bmi();
+            } else {
+                qDebug() << "  Skipped entry with invalid date:" << obj["date"].toString();
             }
         }
+        qDebug() << "DataManager::loadData: Total loaded entries:" << m_bodyCompositionData.size();
     }
     
     // Load exercises
@@ -157,7 +237,20 @@ bool DataManager::saveData()
 QString DataManager::getDataFilePath() const
 {
     QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    return appDataPath + "/fitness-tracker/data.json";
+    QString standardPath = appDataPath + "/fitness-tracker/data.json";
+    QString actualPath = "/home/paul/.local/share/Fitness Tracker/Fitness Tracker/fitness-tracker/data.json";
+    
+    printf("Standard path would be: %s\n", standardPath.toLocal8Bit().data());
+    printf("Actual data file is at: %s\n", actualPath.toLocal8Bit().data());
+    
+    // Check if data exists at the actual location
+    if (QFile::exists(actualPath)) {
+        printf("Using actual data file location\n");
+        return actualPath;
+    } else {
+        printf("Using standard path (no data at actual location)\n");
+        return standardPath;
+    }
 }
 
 void DataManager::ensureDataDirectory() const

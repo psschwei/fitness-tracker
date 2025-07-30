@@ -87,6 +87,9 @@ void JournalContentArea::setupUI()
     m_workoutView = new WorkoutView(m_dataManager);
     m_exerciseLibrary = new ExerciseLibrary(m_dataManager);
     
+    // Create analytics tab
+    m_analyticsTab = new AnalyticsTab(m_dataManager);
+    
     // Create stacked widget for workouts
     m_workoutStackedWidget = new QStackedWidget();
 
@@ -113,6 +116,7 @@ void JournalContentArea::setupUI()
     m_tabWidget->addTab(m_stackedWidget, "Body Composition");
     m_tabWidget->addTab(m_workoutStackedWidget, "Workouts");
     m_tabWidget->addTab(m_exerciseLibrary, "Exercise Library");
+    m_tabWidget->addTab(m_analyticsTab, "Visualizations");
     
     // Create main layout
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -294,6 +298,10 @@ void JournalContentArea::setupKeyboardShortcuts()
     QShortcut *exerciseLibraryShortcut = new QShortcut(QKeySequence("l"), this);
     connect(exerciseLibraryShortcut, &QShortcut::activated, this, &JournalContentArea::switchToExerciseLibrary);
     
+    // Visualizations tab - 'v' key
+    QShortcut *visualizationsShortcut = new QShortcut(QKeySequence("v"), this);
+    connect(visualizationsShortcut, &QShortcut::activated, this, &JournalContentArea::switchToVisualizations);
+    
     // Action shortcuts
     // Edit - 'e' key
     QShortcut *editShortcut = new QShortcut(QKeySequence("e"), this);
@@ -334,6 +342,11 @@ void JournalContentArea::switchToWorkouts()
 void JournalContentArea::switchToExerciseLibrary()
 {
     m_tabWidget->setCurrentIndex(2);
+}
+
+void JournalContentArea::switchToVisualizations()
+{
+    m_tabWidget->setCurrentIndex(3);
 }
 
 void JournalContentArea::onEditShortcut()
